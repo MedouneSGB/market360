@@ -1,30 +1,33 @@
 package com.market360.agents;
 
 import com.market360.core.model.AnalysisRequest;
+import com.market360.core.model.GTMPlan;
 import com.market360.core.model.MarketReport;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.StructuredTaskScope;
+import java.util.function.Consumer;
 
 /**
- * Orchestrateur principal — lance les 4 agents en parallèle via StructuredTaskScope.
+ * Orchestrateur principal — pipeline en deux phases avec un seul StructuredTaskScope.
  *
- * Pattern : tous les agents tournent en parallèle (virtual threads).
- * Si l'un échoue, ShutdownOnFailure annule les autres immédiatement.
+ * Phase 1 (séquentiel) : AnalystAgent → ProductBrief
+ * Phase 2 (parallèle)  : StrategistAgent + TrendsAgent en parallèle
+ *                        CreativeAgent attend le GTM à l'intérieur de sa propre tâche
  */
 @Service
 public class CMOAgent {
 
-    private final AnalystAgent   analystAgent;
+    private final AnalystAgent    analystAgent;
     private final StrategistAgent strategistAgent;
-    private final TrendsAgent    trendsAgent;
-    private final CreativeAgent  creativeAgent;
+    private final TrendsAgent     trendsAgent;
+    private final CreativeAgent   creativeAgent;
 
     public CMOAgent(
-            AnalystAgent   analystAgent,
+            AnalystAgent    analystAgent,
             StrategistAgent strategistAgent,
-            TrendsAgent    trendsAgent,
-            CreativeAgent  creativeAgent
+            TrendsAgent     trendsAgent,
+            CreativeAgent   creativeAgent
     ) {
         this.analystAgent    = analystAgent;
         this.strategistAgent = strategistAgent;
@@ -32,27 +35,42 @@ public class CMOAgent {
         this.creativeAgent   = creativeAgent;
     }
 
-    public MarketReport orchestrate(AnalysisRequest request) throws InterruptedException {
-        // Phase 1 : analyse du repo (bloquant — les autres agents en dépendent)
-        var brief = analystAgent.analyze(request.repoUrl());
+    /**
+     * @param onEvent callback pour les événements de progression (agent, status, message)
+     */
+    public MarketReport orchestrate(AnalysisRequest request, Consumer<AgentEvent> onEvent)
+            throws InterruptedException {
 
-        // Phase 2 : StrategistAgent, TrendsAgent et CreativeAgent en parallèle
+        // Phase 1 — analyse séquentielle (les autres agents en ont besoin)
+        onEvent.accept(new AgentEvent("analyst", "running", "Analyse du repo GitHub..."));
+        var brief = analystAgent.analyze(request.repoUrl());
+        onEvent.accept(new AgentEvent("analyst", "done", "Analyse terminée"));
+
+        // Phase 2 — StrategistAgent, TrendsAgent, et CreativeAgent (qui attend GTM)
         try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
 
-            var gtmTask     = scope.fork(() -> strategistAgent.buildGTM(brief));
-            var trendsTask  = scope.fork(() -> trendsAgent.fetch(brief, request.market(), request.location()));
+            onEvent.accept(new AgentEvent("strategist", "running", "Construction du plan GTM..."));
+            onEvent.accept(new AgentEvent("trends",     "running", "Analyse des tendances marché..."));
 
-            // Attendre GTM pour alimenter le CreativeAgent
+            var gtmTask    = scope.fork(() -> strategistAgent.buildGTM(brief));
+            var trendsTask = scope.fork(() -> trendsAgent.fetch(brief, request.market(), request.location()));
+
+            // CreativeAgent attend GTM dans sa propre tâche — pas de scope imbriqué
+            var creativeTask = scope.fork(() -> {
+                GTMPlan gtm = gtmTask.get();  // attend uniquement GTM, pas trends
+                onEvent.accept(new AgentEvent("creative", "running", "Génération du copy créatif..."));
+                return creativeAgent.generate(brief, gtm);
+            });
+
             scope.join().throwIfFailed();
 
-            var gtm = gtmTask.get();
+            onEvent.accept(new AgentEvent("strategist", "done", "Plan GTM terminé"));
+            onEvent.accept(new AgentEvent("trends",     "done", "Tendances collectées"));
+            onEvent.accept(new AgentEvent("creative",   "done", "Assets créatifs générés"));
 
-            try (var creativeScope = new StructuredTaskScope.ShutdownOnFailure()) {
-                var creativeTask = creativeScope.fork(() -> creativeAgent.generate(brief, gtm));
-                creativeScope.join().throwIfFailed();
-
-                return MarketReport.from(brief, gtm, trendsTask.get(), creativeTask.get());
-            }
+            return MarketReport.from(brief, gtmTask.get(), trendsTask.get(), creativeTask.get());
         }
     }
+
+    public record AgentEvent(String agent, String status, String message) {}
 }

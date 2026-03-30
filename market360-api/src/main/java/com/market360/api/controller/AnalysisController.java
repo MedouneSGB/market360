@@ -1,6 +1,7 @@
 package com.market360.api.controller;
 
 import com.market360.agents.CMOAgent;
+import com.market360.agents.CMOAgent.AgentEvent;
 import com.market360.core.model.AnalysisRequest;
 import com.market360.core.model.MarketReport;
 import jakarta.validation.Valid;
@@ -10,17 +11,19 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
 
 /**
  * Endpoints REST + SSE pour l'analyse de repos.
  *
- * POST /api/v1/analyze              → lance une analyse, retourne jobId
- * GET  /api/v1/analyze/{jobId}/stream  → SSE (progression en temps réel)
- * GET  /api/v1/analyze/{jobId}/report  → rapport JSON final
+ * POST /api/v1/analyze                  → lance une analyse, retourne jobId
+ * GET  /api/v1/analyze/{jobId}/stream   → SSE (progression en temps réel, avec replay)
+ * GET  /api/v1/analyze/{jobId}/report   → rapport JSON final
  */
 @RestController
 @RequestMapping("/api/v1")
@@ -29,8 +32,10 @@ public class AnalysisController {
     private final CMOAgent cmoAgent;
 
     // Stockage en mémoire pour MVP — à remplacer par Redis en Phase 2
-    private final Map<String, MarketReport> reports = new ConcurrentHashMap<>();
-    private final Map<String, SseEmitter>   emitters = new ConcurrentHashMap<>();
+    private final Map<String, MarketReport>  reports  = new ConcurrentHashMap<>();
+    private final Map<String, SseEmitter>    emitters = new ConcurrentHashMap<>();
+    // Buffer des events par jobId — permet le replay en cas de connexion tardive
+    private final Map<String, List<Map<String, String>>> eventBuffers = new ConcurrentHashMap<>();
 
     public AnalysisController(CMOAgent cmoAgent) {
         this.cmoAgent = cmoAgent;
@@ -41,8 +46,8 @@ public class AnalysisController {
             @Valid @RequestBody AnalysisRequest request
     ) {
         String jobId = UUID.randomUUID().toString();
+        eventBuffers.put(jobId, Collections.synchronizedList(new ArrayList<>()));
 
-        // Lancement en virtual thread pour ne pas bloquer le handler HTTP
         Thread.ofVirtual().name("analysis-" + jobId).start(() -> runAnalysis(jobId, request));
 
         return ResponseEntity.accepted().body(Map.of("jobId", jobId));
@@ -50,14 +55,22 @@ public class AnalysisController {
 
     @GetMapping(value = "/analyze/{jobId}/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter streamAnalysis(@PathVariable String jobId) {
-        var emitter = new SseEmitter(600_000L); // 10 min timeout
+        var emitter = new SseEmitter(600_000L);
         emitters.put(jobId, emitter);
         emitter.onCompletion(() -> emitters.remove(jobId));
         emitter.onTimeout(() -> emitters.remove(jobId));
 
-        // Si le rapport est déjà prêt (arrivée tardive du client)
+        // Replay des events déjà émis (connexion tardive)
+        var buffer = eventBuffers.get(jobId);
+        if (buffer != null) {
+            synchronized (buffer) {
+                buffer.forEach(event -> sendToEmitter(emitter, event));
+            }
+        }
+
+        // Si le rapport est déjà terminé, compléter immédiatement
         if (reports.containsKey(jobId)) {
-            sendDoneEvent(emitter, jobId);
+            completeDone(emitter, jobId);
         }
 
         return emitter;
@@ -73,29 +86,45 @@ public class AnalysisController {
     // --- Privé ---
 
     private void runAnalysis(String jobId, AnalysisRequest request) {
-        sendEvent(jobId, "analyst",    "running", "Analyse du repo GitHub...");
         try {
-            var report = cmoAgent.orchestrate(request);
+            var report = cmoAgent.orchestrate(request, event -> publishEvent(jobId, event));
             reports.put(jobId, report);
-            sendEvent(jobId, "all", "done", "Rapport prêt");
-            sendDoneEvent(emitters.get(jobId), jobId);
+            publishEvent(jobId, new AgentEvent("all", "done", "Rapport prêt"));
+            completeDone(emitters.get(jobId), jobId);
         } catch (Exception e) {
-            sendEvent(jobId, "all", "error", e.getMessage());
+            publishEvent(jobId, new AgentEvent("all", "error",
+                    e.getMessage() != null ? e.getMessage() : "Erreur inconnue"));
         }
     }
 
-    private void sendEvent(String jobId, String agent, String status, String message) {
+    /** Bufferise l'event ET l'envoie au client connecté. */
+    private void publishEvent(String jobId, AgentEvent event) {
+        var payload = Map.of(
+                "agent",   event.agent(),
+                "status",  event.status(),
+                "message", event.message()
+        );
+        var buffer = eventBuffers.get(jobId);
+        if (buffer != null) {
+            synchronized (buffer) {
+                buffer.add(payload);
+            }
+        }
         var emitter = emitters.get(jobId);
-        if (emitter == null) return;
-        try {
-            emitter.send(SseEmitter.event()
-                    .data(Map.of("agent", agent, "status", status, "message", message)));
-        } catch (IOException ignored) {
-            emitters.remove(jobId);
+        if (emitter != null) {
+            sendToEmitter(emitter, payload);
         }
     }
 
-    private void sendDoneEvent(SseEmitter emitter, String jobId) {
+    private void sendToEmitter(SseEmitter emitter, Map<String, String> payload) {
+        try {
+            emitter.send(SseEmitter.event().data(payload));
+        } catch (IOException ignored) {
+            // Le client s'est déconnecté — le buffer conserve les events
+        }
+    }
+
+    private void completeDone(SseEmitter emitter, String jobId) {
         if (emitter == null) return;
         try {
             emitter.send(SseEmitter.event()
