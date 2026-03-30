@@ -30,6 +30,9 @@ management:
 server:
   port: 8080
 
+github:
+  token: ${GITHUB_TOKEN:}    # optionnel — 5000 req/h avec, 60 req/h sans
+
 logging:
   level:
     com.market360: DEBUG
