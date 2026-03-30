@@ -1,0 +1,26 @@
+# Maven
+target/
+.mvn/wrapper/maven-wrapper.jar
+!.mvn/wrapper/maven-wrapper.properties
+
+# Spring Boot local config (secrets)
+**/application-local.yml
+**/application-local.yaml
+
+# Secrets — jamais commitées
+.env
+*.env
+secrets/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.class
+
+# GraalVM
+/native/
+
+# OS
+.DS_Store
+Thumbs.db

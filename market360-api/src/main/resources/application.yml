@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: market360
+  threads:
+    virtual:
+      enabled: true          # Spring Boot 3.2+ — active Tomcat virtual threads
+
+  ai:
+    anthropic:
+      api-key: ${ANTHROPIC_API_KEY}
+      chat:
+        options:
+          model: claude-sonnet-4-6
+          max-tokens: 4096
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      chat:
+        options:
+          model: llama3.1
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info
+  endpoint:
+    health:
+      show-details: always
+
+server:
+  port: 8080
+
+logging:
+  level:
+    com.market360: DEBUG
+    org.springframework.ai: INFO
