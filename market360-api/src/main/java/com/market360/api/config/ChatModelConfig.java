@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.Scope;
 
 /**
  * Résout l'ambiguïté entre anthropicChatModel et ollamaChatModel
@@ -23,6 +24,7 @@ public class ChatModelConfig {
 
     @Bean
     @Profile("local")
+    @Scope("prototype")   // CRITIQUE : chaque agent doit avoir sa propre instance du builder
     @ConditionalOnMissingBean(ChatClient.Builder.class)
     public ChatClient.Builder localChatClientBuilder(OllamaChatModel ollamaChatModel) {
         return ChatClient.builder(ollamaChatModel);
