@@ -23,24 +23,28 @@
             <artifactId>market360-skills</artifactId>
         </dependency>
 
-        <!-- Spring AI — Anthropic Claude -->
+        <!--
+            Les agents utilisent ChatClient — interface agnostique du modèle.
+            Les starters de modèle (Anthropic, Ollama) sont déclarés dans market360-api
+            qui choisit le modèle actif selon le profil Spring.
+        -->
+        <!-- API Spring AI — ChatClient (agnostique du modèle) -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-anthropic-spring-boot-starter</artifactId>
+            <artifactId>spring-ai-client-chat</artifactId>
             <version>${spring-ai.version}</version>
         </dependency>
 
-        <!-- Spring AI — Ollama (fallback local) -->
-        <dependency>
-            <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-ollama-spring-boot-starter</artifactId>
-            <version>${spring-ai.version}</version>
-        </dependency>
-
-        <!-- Spring Context -->
+        <!-- Spring Context (pour @Service) -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
+        </dependency>
+
+        <!-- Jackson pour GitHubClient -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
 
         <!-- Tests -->

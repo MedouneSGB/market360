@@ -91,10 +91,10 @@
                     <version>3.13.0</version>
                     <configuration>
                         <release>25</release>
-                        <!-- Enable preview features for StructuredTaskScope -->
-                        <compilerArgs>
-                            <arg>--enable-preview</arg>
-                        </compilerArgs>
+                        <!-- StructuredTaskScope est en preview en Java 25 (JEP 505) -->
+                        <enablePreview>true</enablePreview>
+                        <!-- Requis pour Spring MVC @PathVariable / @RequestParam sans @Value -->
+                        <parameters>true</parameters>
                     </configuration>
                 </plugin>
                 <plugin>
