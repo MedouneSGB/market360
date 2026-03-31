@@ -9,7 +9,8 @@
       "Bash(/tmp/CheckJoiner.java:*)",
       "Bash(/tmp/TestScopeError.java:*)",
       "Bash(jar tf:*)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(ping:*)"
     ]
   }
 }
