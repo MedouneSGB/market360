@@ -6,332 +6,368 @@
   <title>Market360 — AI Marketing Intelligence</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
     * { font-family: 'Inter', sans-serif; }
 
-    /* ---- Light / Dark tokens ---- */
+    /* ---- Tokens ---- */
     :root {
-      --bg: #f8f9ff;
+      --bg: #fafbff;
       --bg2: #ffffff;
       --border: rgba(0,0,0,0.07);
-      --card: #ffffff;
-      --text: #0f1117;
+      --text: #0a0a0f;
       --muted: #6b7280;
-      --subtle: rgba(0,0,0,0.04);
-      --glow1: rgba(168,85,247,0.08);
-      --glow2: rgba(99,102,241,0.06);
+      --subtle: rgba(0,0,0,0.03);
+      --card-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
     }
     html.dark {
-      --bg: #080b14;
+      --bg: #07090f;
       --bg2: #0d1021;
       --border: rgba(255,255,255,0.08);
-      --card: rgba(255,255,255,0.03);
       --text: #f9fafb;
       --muted: #6b7280;
       --subtle: rgba(255,255,255,0.03);
-      --glow1: rgba(168,85,247,0.20);
-      --glow2: rgba(99,102,241,0.18);
+      --card-shadow: 0 1px 3px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.2);
     }
-
     body { background: var(--bg); color: var(--text); transition: background 0.3s, color 0.3s; }
+    .muted { color: var(--muted); }
 
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      backdrop-filter: blur(10px);
-      transition: background 0.3s, border 0.3s;
+    /* ---- Mesh gradient background ---- */
+    .mesh {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
     }
+    html.light .mesh-circle-1 { background: radial-gradient(ellipse, rgba(139,92,246,0.12) 0%, transparent 70%); }
+    html.light .mesh-circle-2 { background: radial-gradient(ellipse, rgba(99,102,241,0.08) 0%, transparent 70%); }
+    html.light .mesh-circle-3 { background: radial-gradient(ellipse, rgba(59,130,246,0.06) 0%, transparent 70%); }
+    html.dark .mesh-circle-1 { background: radial-gradient(ellipse, rgba(139,92,246,0.18) 0%, transparent 70%); }
+    html.dark .mesh-circle-2 { background: radial-gradient(ellipse, rgba(99,102,241,0.14) 0%, transparent 70%); }
+    html.dark .mesh-circle-3 { background: radial-gradient(ellipse, rgba(59,130,246,0.10) 0%, transparent 70%); }
+    .mesh-circle-1 { position:absolute; width:800px; height:800px; top:-200px; left:-100px; animation: float1 12s ease-in-out infinite; }
+    .mesh-circle-2 { position:absolute; width:600px; height:600px; top:30%; right:-150px; animation: float2 15s ease-in-out infinite; }
+    .mesh-circle-3 { position:absolute; width:500px; height:500px; bottom:-100px; left:30%; animation: float3 10s ease-in-out infinite; }
+    @keyframes float1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(30px,-20px)} }
+    @keyframes float2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-20px,30px)} }
+    @keyframes float3 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(20px,-15px)} }
+
+    /* ---- Gradients ---- */
+    .gradient-text {
+      background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #3b82f6 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .gradient-bg { background: linear-gradient(135deg, #8b5cf6, #6366f1); }
+    .gradient-border {
+      border: 1px solid transparent;
+      background-clip: padding-box;
+      position: relative;
+    }
+
+    /* ---- Cards ---- */
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      box-shadow: var(--card-shadow);
+      transition: background 0.3s, border 0.3s, box-shadow 0.2s;
+    }
+    .card:hover { box-shadow: 0 4px 24px rgba(139,92,246,0.10), 0 1px 3px rgba(0,0,0,0.06); }
+
+    /* ---- Agent feature cards ---- */
+    .agent-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      box-shadow: var(--card-shadow);
+      transition: all 0.25s ease;
+    }
+    .agent-card:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(139,92,246,0.12); }
+
+    /* ---- Input ---- */
     .input-field {
       background: var(--subtle);
-      border: 1px solid var(--border);
+      border: 1.5px solid var(--border);
       color: var(--text);
       transition: all 0.2s;
     }
-    .input-field:focus { outline: none; border-color: rgba(168,85,247,0.4); }
+    .input-field:focus { outline: none; border-color: rgba(139,92,246,0.5); background: var(--bg2); box-shadow: 0 0 0 3px rgba(139,92,246,0.08); }
     .input-field::placeholder { color: var(--muted); }
-    .muted { color: var(--muted); }
 
-    .gradient-text {
-      background: linear-gradient(135deg, #a855f7, #6366f1, #3b82f6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .gradient-bg { background: linear-gradient(135deg, #a855f7, #6366f1); }
-
-    /* Drawer */
+    /* ---- Drawer ---- */
     #drawer {
       background: var(--bg2);
       border-top: 1px solid var(--border);
       transform: translateY(100%);
-      transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1), background 0.3s;
+      transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1);
     }
     #drawer.open { transform: translateY(0); }
-    #overlay { opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
-    #overlay.open { opacity: 1; pointer-events: all; }
+    #overlay { opacity:0; pointer-events:none; transition: opacity 0.3s ease; }
+    #overlay.open { opacity:1; pointer-events:all; }
 
-    /* Loader bar */
-    #loaderBar {
-      height: 4px;
-      background: var(--border);
-      border-radius: 99px;
-      overflow: hidden;
-    }
+    /* ---- Loader ---- */
+    #loaderBar { height:3px; border-radius:99px; overflow:hidden; background: var(--border); }
     #loaderFill {
-      height: 100%;
-      width: 0%;
-      border-radius: 99px;
-      background: linear-gradient(90deg, #a855f7, #6366f1, #3b82f6);
-      transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+      height:100%; width:0%; border-radius:99px;
+      background: linear-gradient(90deg, #8b5cf6, #6366f1, #3b82f6);
+      transition: width 1.5s cubic-bezier(0.4,0,0.2,1);
       position: relative;
     }
     #loaderFill::after {
-      content: '';
-      position: absolute;
-      right: 0; top: 0; bottom: 0;
-      width: 60px;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6));
-      animation: shimmer 1.2s infinite;
+      content:''; position:absolute; right:0; top:0; bottom:0; width:80px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5));
+      animation: shimmer 1s infinite;
     }
-    @keyframes shimmer { 0%,100% { opacity:0.8; } 50% { opacity:0.2; } }
+    @keyframes shimmer { 0%,100%{opacity:0.8} 50%{opacity:0} }
 
-    /* Spinner */
     .spinner {
-      width: 36px; height: 36px;
-      border-radius: 50%;
-      border: 3px solid var(--border);
-      border-top-color: #a855f7;
-      animation: spin 0.8s linear infinite;
+      width:32px; height:32px; border-radius:50%;
+      border:2.5px solid var(--border);
+      border-top-color: #8b5cf6;
+      animation: spin 0.7s linear infinite;
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes spin { to{transform:rotate(360deg)} }
 
-    /* Agent steps */
-    .step-dot {
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: var(--border);
-      transition: all 0.4s ease;
+    .step-dot { width:7px; height:7px; border-radius:50%; background:var(--border); transition:all 0.4s; }
+    .step-dot.active { background:#8b5cf6; box-shadow:0 0 8px rgba(139,92,246,0.5); animation:dotPulse 1.2s infinite; }
+    .step-dot.done { background:#22c55e; }
+    @keyframes dotPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.5)} }
+
+    /* ---- Theme toggle ---- */
+    .theme-toggle { width:42px; height:23px; border-radius:99px; background:var(--border); border:1px solid var(--border); position:relative; cursor:pointer; transition:background 0.3s; }
+    .theme-toggle.dark-on { background:#6366f1; }
+    .theme-thumb { position:absolute; top:2px; left:2px; width:17px; height:17px; border-radius:50%; background:white; transition:transform 0.3s cubic-bezier(0.4,0,0.2,1); display:flex; align-items:center; justify-content:center; font-size:9px; box-shadow:0 1px 3px rgba(0,0,0,0.15); }
+    .theme-toggle.dark-on .theme-thumb { transform:translateX(19px); }
+
+    /* ---- Animations ---- */
+    .fade-in { animation: fadeIn 0.5s ease; }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+    .slide-up { animation: slideUp 0.6s cubic-bezier(0.16,1,0.3,1); }
+    @keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+
+    /* ---- Badge ---- */
+    .badge {
+      display:inline-flex; align-items:center; gap:6px;
+      padding:5px 12px; border-radius:99px; font-size:12px; font-weight:500;
     }
-    .step-dot.active { background: #a855f7; box-shadow: 0 0 8px rgba(168,85,247,0.6); animation: dotPulse 1.2s infinite; }
-    .step-dot.done { background: #22c55e; box-shadow: none; animation: none; }
-    @keyframes dotPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.4)} }
+    html.light .badge { background:rgba(139,92,246,0.07); border:1px solid rgba(139,92,246,0.15); color:#7c3aed; }
+    html.dark .badge { background:rgba(139,92,246,0.12); border:1px solid rgba(139,92,246,0.2); color:#a78bfa; }
 
-    .fade-in { animation: fadeIn 0.4s ease; }
-    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-
-    /* Theme toggle */
-    .theme-toggle {
-      width: 44px; height: 24px;
-      border-radius: 99px;
-      background: var(--border);
-      border: 1px solid var(--border);
-      position: relative;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    .theme-toggle.dark-on { background: #6366f1; }
-    .theme-thumb {
-      position: absolute;
-      top: 2px; left: 2px;
-      width: 18px; height: 18px;
-      border-radius: 50%;
-      background: white;
-      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 10px;
-    }
-    .theme-toggle.dark-on .theme-thumb { transform: translateX(20px); }
-
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    ::-webkit-scrollbar { width:3px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
   </style>
 </head>
 <body class="min-h-screen overflow-x-hidden">
 
-  <!-- Background glow -->
-  <div class="fixed inset-0 overflow-hidden pointer-events-none">
-    <div class="absolute top-[-20%] left-[10%] w-[600px] h-[600px] rounded-full blur-[120px]" style="background:var(--glow1)"></div>
-    <div class="absolute bottom-[-10%] right-[5%] w-[500px] h-[500px] rounded-full blur-[120px]" style="background:var(--glow2)"></div>
+  <!-- Mesh background -->
+  <div class="mesh">
+    <div class="mesh-circle-1"></div>
+    <div class="mesh-circle-2"></div>
+    <div class="mesh-circle-3"></div>
   </div>
 
-  <!-- Main -->
-  <div class="relative z-10 max-w-2xl mx-auto px-6 py-16">
+  <!-- Page -->
+  <div class="relative z-10 max-w-3xl mx-auto px-6 py-12">
 
-    <!-- Header -->
-    <div class="flex justify-end mb-8">
-      <button onclick="toggleTheme()" id="themeToggle" class="theme-toggle flex items-center" title="Changer le thème">
+    <!-- Nav -->
+    <nav class="flex items-center justify-between mb-20">
+      <div class="flex items-center gap-2">
+        <div class="w-7 h-7 rounded-lg gradient-bg flex items-center justify-center">
+          <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+        </div>
+        <span class="font-bold text-sm tracking-tight">Market360</span>
+      </div>
+      <button onclick="toggleTheme()" id="themeToggle" class="theme-toggle">
         <div class="theme-thumb">☀️</div>
       </button>
-    </div>
+    </nav>
 
-    <div class="text-center mb-14">
-      <div class="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm text-purple-600 mb-6" style="background:rgba(168,85,247,0.08); border:1px solid rgba(168,85,247,0.15)">
-        <span class="w-2 h-2 bg-green-500 rounded-full inline-block" style="animation:dotPulse 1.5s infinite"></span>
-        Powered by Claude Sonnet 4.6
+    <!-- Hero -->
+    <div class="text-center mb-16 slide-up">
+      <div class="badge mb-6">
+        <span class="w-1.5 h-1.5 bg-green-500 rounded-full" style="animation:dotPulse 2s infinite"></span>
+        Intelligence Marketing par IA
       </div>
-      <h1 class="text-5xl font-bold mb-4"><span class="gradient-text">Market360</span></h1>
-      <p class="text-lg max-w-xl mx-auto muted">
-        Donnez un repo GitHub. Obtenez un plan marketing complet — analyse produit, GTM, tendances et copy ads.
+
+      <h1 class="text-6xl font-black mb-5 leading-[1.05] tracking-tight">
+        Votre plan marketing<br/>
+        <span class="gradient-text">en quelques minutes</span>
+      </h1>
+
+      <p class="text-lg muted max-w-lg mx-auto leading-relaxed">
+        Donnez un repo GitHub. Obtenez une analyse produit complète, un plan GTM, une veille marché et des assets créatifs — prêts à exécuter.
       </p>
     </div>
 
+    <!-- Agent cards -->
+    <div class="grid grid-cols-4 gap-3 mb-12 slide-up" style="animation-delay:0.1s">
+      <div class="agent-card rounded-2xl p-4 text-center">
+        <div class="text-2xl mb-2">🔍</div>
+        <p class="text-xs font-semibold mb-0.5">Analyst</p>
+        <p class="text-xs muted">Analyse repo</p>
+      </div>
+      <div class="agent-card rounded-2xl p-4 text-center">
+        <div class="text-2xl mb-2">🚀</div>
+        <p class="text-xs font-semibold mb-0.5">Strategist</p>
+        <p class="text-xs muted">Plan GTM</p>
+      </div>
+      <div class="agent-card rounded-2xl p-4 text-center">
+        <div class="text-2xl mb-2">📈</div>
+        <p class="text-xs font-semibold mb-0.5">Trends</p>
+        <p class="text-xs muted">Veille marché</p>
+      </div>
+      <div class="agent-card rounded-2xl p-4 text-center">
+        <div class="text-2xl mb-2">🎨</div>
+        <p class="text-xs font-semibold mb-0.5">Creative</p>
+        <p class="text-xs muted">Copy & ads</p>
+      </div>
+    </div>
+
     <!-- Form -->
-    <div class="card rounded-2xl p-8 shadow-sm">
-      <div class="space-y-5">
+    <div class="card rounded-3xl p-8 slide-up" style="animation-delay:0.2s">
+      <div class="space-y-4">
         <div>
-          <label class="block text-sm font-medium mb-2">URL du repo GitHub</label>
+          <label class="block text-sm font-semibold mb-2">URL du repo GitHub</label>
           <input id="repoUrl" type="url" placeholder="https://github.com/owner/repo"
-            class="input-field w-full rounded-xl px-4 py-3" />
+            class="input-field w-full rounded-xl px-4 py-3.5 text-sm" />
         </div>
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-sm font-medium mb-2">Marché</label>
+            <label class="block text-sm font-semibold mb-2">Marché</label>
             <select id="market" onchange="toggleLocation()"
-              class="input-field w-full rounded-xl px-4 py-3 cursor-pointer appearance-none">
+              class="input-field w-full rounded-xl px-4 py-3.5 text-sm cursor-pointer appearance-none">
               <option value="global">🌍 Global</option>
               <option value="local">📍 Local</option>
             </select>
           </div>
           <div id="locationField" class="hidden">
-            <label class="block text-sm font-medium mb-2">Ville / Pays</label>
+            <label class="block text-sm font-semibold mb-2">Ville / Pays</label>
             <input id="location" type="text" placeholder="Dakar, Paris..."
-              class="input-field w-full rounded-xl px-4 py-3" />
+              class="input-field w-full rounded-xl px-4 py-3.5 text-sm" />
           </div>
         </div>
         <button onclick="startAnalysis()" id="analyzeBtn"
-          class="w-full gradient-bg hover:opacity-90 active:scale-[0.99] transition-all rounded-xl px-6 py-4 font-semibold text-white text-base flex items-center justify-center gap-2">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          class="w-full gradient-bg hover:opacity-90 active:scale-[0.99] transition-all rounded-xl px-6 py-4 font-semibold text-white flex items-center justify-center gap-2 shadow-lg shadow-violet-500/20">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
           </svg>
-          Analyser
+          Analyser ce repo
         </button>
       </div>
     </div>
+
+    <!-- Footer -->
+    <p class="text-center text-xs muted mt-10" style="opacity:0.5">market360.space</p>
+
   </div>
 
   <!-- Overlay -->
-  <div id="overlay" class="fixed inset-0 z-20" style="background:rgba(0,0,0,0.3); backdrop-filter:blur(4px)"></div>
+  <div id="overlay" class="fixed inset-0 z-20" style="background:rgba(0,0,0,0.4); backdrop-filter:blur(6px)"></div>
 
   <!-- Drawer -->
-  <div id="drawer" class="fixed bottom-0 left-0 right-0 z-30 rounded-t-3xl max-h-[90vh] flex flex-col shadow-2xl">
+  <div id="drawer" class="fixed bottom-0 left-0 right-0 z-30 rounded-t-3xl max-h-[90vh] flex flex-col" style="box-shadow:0 -4px 40px rgba(0,0,0,0.12)">
 
-    <!-- Handle -->
     <div class="flex justify-center pt-4 pb-2 shrink-0">
       <div class="w-10 h-1 rounded-full" style="background:var(--border)"></div>
     </div>
 
-    <!-- Drawer header -->
     <div class="flex items-center justify-between px-6 py-3 shrink-0">
       <div>
-        <h2 id="drawerTitle" class="text-base font-semibold">Analyse en cours...</h2>
+        <h2 id="drawerTitle" class="text-base font-bold">Analyse en cours...</h2>
         <p id="drawerSubtitle" class="text-xs muted mt-0.5">Les agents IA travaillent pour vous</p>
       </div>
-      <button onclick="closeDrawer()" class="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:opacity-70" style="background:var(--subtle)">
+      <button onclick="closeDrawer()" class="w-8 h-8 rounded-full flex items-center justify-center transition-all hover:opacity-60" style="background:var(--subtle)">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
         </svg>
       </button>
     </div>
 
-    <!-- Scrollable -->
-    <div class="overflow-y-auto flex-1 px-6 pb-8">
+    <div class="overflow-y-auto flex-1 px-6 pb-10">
 
-      <!-- === LOADER PANEL === -->
+      <!-- Loader -->
       <div id="loaderPanel" class="py-6 space-y-6">
-
-        <!-- Spinner + message dynamique -->
-        <div class="flex flex-col items-center gap-4 py-4">
+        <div class="flex flex-col items-center gap-4 py-2">
           <div class="spinner"></div>
           <div class="text-center">
-            <p id="loaderComment" class="text-sm font-medium" style="min-height:20px">Initialisation du pipeline...</p>
-            <p class="text-xs muted mt-1" id="loaderSub">Connexion aux agents IA</p>
+            <p id="loaderComment" class="text-sm font-semibold">Initialisation du pipeline...</p>
+            <p id="loaderSub" class="text-xs muted mt-1">Connexion aux agents IA</p>
           </div>
         </div>
-
-        <!-- Barre de progression unique -->
         <div>
           <div class="flex justify-between text-xs muted mb-2">
             <span id="loaderStep">Démarrage</span>
             <span id="loaderPercent">0%</span>
           </div>
-          <div id="loaderBar">
-            <div id="loaderFill"></div>
-          </div>
+          <div id="loaderBar"><div id="loaderFill"></div></div>
         </div>
-
-        <!-- Steps agents -->
-        <div class="space-y-3 pt-2">
-          <div class="flex items-center gap-3" id="step-analyst">
+        <div class="space-y-2.5 pt-1">
+          <div class="flex items-center gap-3 py-1" id="step-analyst">
             <div class="step-dot shrink-0"></div>
             <span class="text-sm muted">Analyst — Analyse du repo GitHub</span>
           </div>
-          <div class="flex items-center gap-3" id="step-strategist">
+          <div class="flex items-center gap-3 py-1" id="step-strategist">
             <div class="step-dot shrink-0"></div>
             <span class="text-sm muted">Strategist — Plan Go-To-Market</span>
           </div>
-          <div class="flex items-center gap-3" id="step-trends">
+          <div class="flex items-center gap-3 py-1" id="step-trends">
             <div class="step-dot shrink-0"></div>
             <span class="text-sm muted">Trends — Veille marché</span>
           </div>
-          <div class="flex items-center gap-3" id="step-creative">
+          <div class="flex items-center gap-3 py-1" id="step-creative">
             <div class="step-dot shrink-0"></div>
             <span class="text-sm muted">Creative — Copy publicitaire</span>
           </div>
         </div>
       </div>
 
-      <!-- === REPORT PANEL === -->
-      <div id="reportPanel" class="hidden fade-in space-y-5 pt-2">
+      <!-- Report -->
+      <div id="reportPanel" class="hidden fade-in space-y-4 pt-2">
 
-        <div class="rounded-2xl p-6" style="background:var(--subtle); border:1px solid var(--border)">
+        <div class="rounded-2xl p-6 card">
           <div class="flex items-center gap-3 mb-5">
-            <div class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-sm shrink-0">📦</div>
-            <h3 class="font-semibold">Analyse Produit</h3>
+            <div class="w-8 h-8 rounded-xl gradient-bg flex items-center justify-center text-sm shrink-0">📦</div>
+            <h3 class="font-bold">Analyse Produit</h3>
           </div>
           <div id="productContent" class="space-y-4"></div>
         </div>
 
-        <div class="rounded-2xl p-6" style="background:var(--subtle); border:1px solid var(--border)">
+        <div class="rounded-2xl p-6 card">
           <div class="flex items-center gap-3 mb-5">
-            <div class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-sm shrink-0">🚀</div>
-            <h3 class="font-semibold">Plan Go-To-Market</h3>
+            <div class="w-8 h-8 rounded-xl gradient-bg flex items-center justify-center text-sm shrink-0">🚀</div>
+            <h3 class="font-bold">Plan Go-To-Market</h3>
           </div>
           <div id="gtmContent" class="space-y-4"></div>
         </div>
 
-        <div class="rounded-2xl p-6" style="background:var(--subtle); border:1px solid var(--border)">
+        <div class="rounded-2xl p-6 card">
           <div class="flex items-center gap-3 mb-5">
-            <div class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-sm shrink-0">📈</div>
-            <h3 class="font-semibold">Tendances Marché</h3>
+            <div class="w-8 h-8 rounded-xl gradient-bg flex items-center justify-center text-sm shrink-0">📈</div>
+            <h3 class="font-bold">Tendances Marché</h3>
           </div>
           <div id="trendsContent" class="space-y-4"></div>
         </div>
 
-        <div class="rounded-2xl p-6" style="background:var(--subtle); border:1px solid var(--border)">
+        <div class="rounded-2xl p-6 card">
           <div class="flex items-center gap-3 mb-5">
-            <div class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-sm shrink-0">🎨</div>
-            <h3 class="font-semibold">Assets Créatifs</h3>
+            <div class="w-8 h-8 rounded-xl gradient-bg flex items-center justify-center text-sm shrink-0">🎨</div>
+            <h3 class="font-bold">Assets Créatifs</h3>
           </div>
           <div id="creativeContent" class="space-y-4"></div>
         </div>
 
         <button onclick="closeDrawer()"
-          class="w-full rounded-xl py-3 text-sm transition-all muted hover:opacity-70" style="border:1px solid var(--border)">
+          class="w-full rounded-xl py-3 text-sm font-medium transition-all muted hover:opacity-60" style="border:1px solid var(--border)">
           Analyser un autre repo
         </button>
       </div>
-
     </div>
   </div>
 
   <script>
     const BASE = '';
 
-    // ---- Theme ----
+    // Theme
     const toggle = document.getElementById('themeToggle');
     const thumb = toggle.querySelector('.theme-thumb');
     let dark = false;
-
     function toggleTheme() {
       dark = !dark;
       document.documentElement.classList.toggle('dark', dark);
@@ -339,12 +375,10 @@
       thumb.textContent = dark ? '🌙' : '☀️';
     }
 
-    // ---- Form ----
     function toggleLocation() {
       document.getElementById('locationField').classList.toggle('hidden', document.getElementById('market').value !== 'local');
     }
 
-    // ---- Drawer ----
     function openDrawer() {
       document.getElementById('drawer').classList.add('open');
       document.getElementById('overlay').classList.add('open');
@@ -354,20 +388,18 @@
       document.getElementById('drawer').classList.remove('open');
       document.getElementById('overlay').classList.remove('open');
       document.body.style.overflow = '';
-      resetBtn();
-      resetLoader();
+      resetBtn(); resetLoader();
       document.getElementById('loaderPanel').classList.remove('hidden');
       document.getElementById('reportPanel').classList.add('hidden');
       document.getElementById('drawerTitle').textContent = 'Analyse en cours...';
       document.getElementById('drawerSubtitle').textContent = 'Les agents IA travaillent pour vous';
     }
 
-    // ---- Loader ----
     const STEPS = {
-      analyst:    { pct: 25, step: 'Analyst Agent',    comment: "Lecture du README et des issues GitHub...", sub: "Extraction du stack, audience et USP" },
-      strategist: { pct: 55, step: 'Strategist Agent', comment: "Construction du plan Go-To-Market...",       sub: "Canaux, milestones et stratégie de prix" },
-      trends:     { pct: 75, step: 'Trends Agent',     comment: "Analyse des tendances marché...",            sub: "Concurrents, opportunités et menaces" },
-      creative:   { pct: 90, step: 'Creative Agent',   comment: "Rédaction du copy publicitaire...",          sub: "Headlines, variantes A/B et brief visuel" },
+      analyst:    { pct:25, step:'Analyst Agent',    comment:'Lecture du README et des issues GitHub...', sub:'Extraction du stack, audience et USP' },
+      strategist: { pct:55, step:'Strategist Agent', comment:'Construction du plan Go-To-Market...', sub:'Canaux, milestones et stratégie de prix' },
+      trends:     { pct:75, step:'Trends Agent',     comment:'Analyse des tendances marché...', sub:'Concurrents, opportunités et menaces' },
+      creative:   { pct:90, step:'Creative Agent',   comment:'Rédaction du copy publicitaire...', sub:'Headlines, variantes A/B et brief visuel' },
     };
 
     function setLoaderProgress(agent, status) {
@@ -377,52 +409,44 @@
       const label = document.querySelector(`#step-${agent} span`);
       if (status === 'running') {
         dot.className = 'step-dot shrink-0 active';
-        label.style.color = '#a855f7';
-        label.style.fontWeight = '500';
+        label.style.color = '#8b5cf6'; label.style.fontWeight = '500';
         setBar(s.pct - 5, s.step, s.comment, s.sub);
       } else if (status === 'done') {
         dot.className = 'step-dot shrink-0 done';
         label.style.color = '#22c55e';
-        setBar(s.pct, s.step + ' terminé', s.comment.replace('...', ' ✓'), '');
+        setBar(s.pct, s.step + ' ✓', '', '');
       }
     }
-
     function setBar(pct, step, comment, sub) {
       document.getElementById('loaderFill').style.width = pct + '%';
       document.getElementById('loaderPercent').textContent = pct + '%';
       document.getElementById('loaderStep').textContent = step;
-      document.getElementById('loaderComment').textContent = comment;
-      document.getElementById('loaderSub').textContent = sub;
+      if (comment) document.getElementById('loaderComment').textContent = comment;
+      if (sub !== undefined) document.getElementById('loaderSub').textContent = sub;
     }
-
     function resetLoader() {
-      document.getElementById('loaderFill').style.width = '0%';
-      document.getElementById('loaderPercent').textContent = '0%';
-      document.getElementById('loaderStep').textContent = 'Démarrage';
-      document.getElementById('loaderComment').textContent = 'Initialisation du pipeline...';
-      document.getElementById('loaderSub').textContent = 'Connexion aux agents IA';
+      setBar(0, 'Démarrage', 'Initialisation du pipeline...', 'Connexion aux agents IA');
       ['analyst','strategist','trends','creative'].forEach(a => {
         const dot = document.querySelector(`#step-${a} .step-dot`);
         const label = document.querySelector(`#step-${a} span`);
-        if (dot) { dot.className = 'step-dot shrink-0'; }
+        if (dot) dot.className = 'step-dot shrink-0';
         if (label) { label.style.color = ''; label.style.fontWeight = ''; }
       });
     }
 
-    // ---- Report rendering ----
     function tag(label, value) {
       if (!value) return '';
       return `<div>
-        <p class="text-xs font-medium uppercase tracking-wider mb-1 muted">${label}</p>
+        <p class="text-xs font-semibold uppercase tracking-wider mb-1 muted">${label}</p>
         <p class="text-sm leading-relaxed">${value}</p>
       </div>`;
     }
     function list(label, items) {
       if (!items?.length) return '';
       return `<div>
-        <p class="text-xs font-medium uppercase tracking-wider mb-2 muted">${label}</p>
+        <p class="text-xs font-semibold uppercase tracking-wider mb-2 muted">${label}</p>
         <ul class="space-y-1.5">
-          ${items.map(i => `<li class="text-sm leading-relaxed flex gap-2"><span class="text-purple-500 shrink-0 mt-0.5">›</span><span>${i}</span></li>`).join('')}
+          ${items.map(i=>`<li class="text-sm leading-relaxed flex gap-2"><span class="text-violet-500 shrink-0 mt-0.5 font-bold">›</span><span>${i}</span></li>`).join('')}
         </ul>
       </div>`;
     }
@@ -431,16 +455,16 @@
       const p = r.product;
       document.getElementById('productContent').innerHTML = `
         <div class="mb-1">
-          <h4 class="text-xl font-bold">${p.name||''}</h4>
+          <h4 class="text-xl font-black">${p.name||''}</h4>
           ${p.githubStars!==undefined?`<div class="flex gap-3 mt-1 text-xs muted"><span>⭐ ${p.githubStars} stars</span><span>🐛 ${p.openIssues} issues</span></div>`:''}
         </div>
-        ${tag('Description',p.description)}${tag('Stack',p.stack)}${tag('Audience',p.audience)}${tag('USP',p.usp)}${list('Fonctionnalités clés',p.keyFeatures)}`;
+        ${tag('Description',p.description)}${tag('Stack',p.stack)}${tag('Audience',p.audience)}${tag('USP',p.usp)}${list('Fonctionnalités',p.keyFeatures)}`;
 
       const g = r.gtmPlan;
       document.getElementById('gtmContent').innerHTML =
         tag('Segment cible',g.targetSegment)+tag('Positionnement',g.positioningStatement)+
-        list('Canaux prioritaires',g.channels)+list('Milestones 90 jours',g.milestones)+
-        tag('Stratégie pricing',g.pricingStrategy)+tag('Avantage concurrentiel',g.competitiveAdvantage);
+        list('Canaux',g.channels)+list('Milestones',g.milestones)+
+        tag('Pricing',g.pricingStrategy)+tag('Avantage concurrentiel',g.competitiveAdvantage);
 
       const t = r.trends;
       document.getElementById('trendsContent').innerHTML =
@@ -449,24 +473,23 @@
 
       const c = r.creative;
       document.getElementById('creativeContent').innerHTML = `
-        <div class="rounded-xl p-5 mb-2" style="background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.15)">
-          <p class="text-xl font-bold mb-1">${c.headline||''}</p>
+        <div class="rounded-xl p-5 mb-3" style="background:linear-gradient(135deg,rgba(139,92,246,0.08),rgba(99,102,241,0.05));border:1px solid rgba(139,92,246,0.15)">
+          <p class="text-xl font-black mb-1">${c.headline||''}</p>
           <p class="text-sm muted">${c.subheadline||''}</p>
-          ${c.cta?`<span class="inline-block mt-3 gradient-bg text-white text-xs font-semibold px-4 py-1.5 rounded-full">${c.cta}</span>`:''}
+          ${c.cta?`<span class="inline-block mt-3 gradient-bg text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm shadow-violet-500/20">${c.cta}</span>`:''}
         </div>
         ${c.adVariants?`<div>
-          <p class="text-xs font-medium uppercase tracking-wider mb-3 muted">Variantes A/B</p>
-          <div class="space-y-3">
+          <p class="text-xs font-semibold uppercase tracking-wider mb-3 muted">Variantes A/B</p>
+          <div class="space-y-2.5">
             ${c.adVariants.map((v,i)=>`
               <div class="rounded-xl p-4" style="background:var(--subtle);border:1px solid var(--border)">
-                <span class="text-xs text-purple-500 font-semibold mb-2 block">Variante ${i+1}</span>
+                <span class="text-xs font-bold text-violet-500 mb-2 block">Variante ${i+1}</span>
                 <p class="text-sm leading-relaxed whitespace-pre-line">${v}</p>
               </div>`).join('')}
           </div></div>`:''}
-        ${c.visualBrief?`<div class="mt-2"><p class="text-xs font-medium uppercase tracking-wider mb-2 muted">Brief Visuel</p><p class="text-sm muted leading-relaxed italic">${c.visualBrief}</p></div>`:''}`;
+        ${c.visualBrief?`<div class="mt-3"><p class="text-xs font-semibold uppercase tracking-wider mb-2 muted">Brief Visuel</p><p class="text-sm muted leading-relaxed italic">${c.visualBrief}</p></div>`:''}`;
     }
 
-    // ---- Main ----
     async function startAnalysis() {
       const repoUrl = document.getElementById('repoUrl').value.trim();
       if (!repoUrl) { document.getElementById('repoUrl').focus(); return; }
@@ -476,30 +499,24 @@
       resetLoader();
       document.getElementById('loaderPanel').classList.remove('hidden');
       document.getElementById('reportPanel').classList.add('hidden');
-      document.getElementById('drawerTitle').textContent = 'Analyse en cours...';
-      document.getElementById('drawerSubtitle').textContent = 'Les agents IA travaillent pour vous';
       openDrawer();
 
       const btn = document.getElementById('analyzeBtn');
       btn.disabled = true;
-      btn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg> En cours...`;
+      btn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg> Analyse en cours...`;
 
       try {
         const body = { repoUrl, market };
         if (market === 'local' && location) body.location = location;
-
         const res = await fetch(`${BASE}/api/v1/analyze`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+          method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
         });
         const { jobId } = await res.json();
-
         const es = new EventSource(`${BASE}/api/v1/analyze/${jobId}/stream`);
         es.onmessage = (e) => {
           const data = JSON.parse(e.data);
           if (data.agent && data.agent !== 'all') setLoaderProgress(data.agent, data.status);
-          if (data.agent === 'all' && data.status === 'done' && data.reportId) {
-            es.close(); fetchReport(data.reportId);
-          }
+          if (data.agent === 'all' && data.status === 'done' && data.reportId) { es.close(); fetchReport(data.reportId); }
           if (data.status === 'error') { es.close(); resetBtn(); }
         };
         es.onerror = () => { es.close(); resetBtn(); };
@@ -507,7 +524,7 @@
     }
 
     async function fetchReport(jobId) {
-      setBar(100, 'Rapport prêt !', 'Rapport marketing généré avec succès 🎉', '');
+      setBar(100, 'Rapport prêt !', 'Rapport généré avec succès 🎉', '');
       try {
         const res = await fetch(`${BASE}/api/v1/analyze/${jobId}/report`);
         const report = await res.json();
@@ -517,7 +534,7 @@
           document.getElementById('drawerSubtitle').textContent = report.product?.name || '';
           document.getElementById('loaderPanel').classList.add('hidden');
           document.getElementById('reportPanel').classList.remove('hidden');
-        }, 600);
+        }, 500);
       } catch(err) { console.error(err); }
       resetBtn();
     }
@@ -525,7 +542,7 @@
     function resetBtn() {
       const btn = document.getElementById('analyzeBtn');
       btn.disabled = false;
-      btn.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> Analyser`;
+      btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> Analyser ce repo`;
     }
   </script>
 </body>
