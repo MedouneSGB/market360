@@ -1,0 +1,33 @@
+steps:
+  # Build Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - build
+      - -f
+      - market360-infra/Dockerfile
+      - -t
+      - us-central1-docker.pkg.dev/market360-492002/market360/api:latest
+      - -t
+      - us-central1-docker.pkg.dev/market360-492002/market360/api:$COMMIT_SHA
+      - .
+
+  # Push image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - push
+      - --all-tags
+      - us-central1-docker.pkg.dev/market360-492002/market360/api
+
+  # Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - market360
+      - --image=us-central1-docker.pkg.dev/market360-492002/market360/api:$COMMIT_SHA
+      - --region=us-central1
+      - --platform=managed
+
+options:
+  logging: CLOUD_LOGGING_ONLY
