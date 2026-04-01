@@ -1,17 +1,28 @@
 steps:
-  # Build Docker image
+  # Pull cache image pour accélérer le build
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+      - -c
+      - |
+        docker pull us-central1-docker.pkg.dev/market360-492002/market360/api:cache || true
+
+  # Build avec cache
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - build
       - -f
       - market360-infra/Dockerfile
+      - --cache-from=us-central1-docker.pkg.dev/market360-492002/market360/api:cache
       - -t
       - us-central1-docker.pkg.dev/market360-492002/market360/api:latest
       - -t
       - us-central1-docker.pkg.dev/market360-492002/market360/api:$COMMIT_SHA
+      - -t
+      - us-central1-docker.pkg.dev/market360-492002/market360/api:cache
       - .
 
-  # Push image
+  # Push toutes les tags (latest, commit SHA, cache)
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - push
@@ -31,3 +42,4 @@ steps:
 
 options:
   logging: CLOUD_LOGGING_ONLY
+  machineType: E2_HIGHCPU_8
