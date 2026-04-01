@@ -2,6 +2,8 @@
 
 > **Une équipe IA marketing complète qui analyse votre repo GitHub et produit un plan marketing prêt à exécuter — en 10 minutes au lieu de 3 jours.**
 
+🚀 **Production** : `https://market360-878412550299.us-central1.run.app`
+
 [![Java](https://img.shields.io/badge/Java-25-orange?style=flat-square&logo=openjdk)](https://openjdk.org/projects/jdk/25/)
 [![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.5-6DB33F?style=flat-square&logo=springboot)](https://spring.io/projects/spring-boot)
 [![Spring AI](https://img.shields.io/badge/Spring_AI-1.0_GA-6DB33F?style=flat-square&logo=spring)](https://spring.io/projects/spring-ai)
@@ -20,7 +22,7 @@ Vous donnez un repo GitHub. Market360 vous retourne en quelques minutes :
 - **Assets créatifs** — headline, 3 variantes d'ads A/B, brief visuel pour génération d'images
 
 ```bash
-curl -X POST http://localhost:8083/api/v1/analyze \
+curl -X POST https://market360-878412550299.us-central1.run.app/api/v1/analyze \
   -H "Content-Type: application/json" \
   -d '{"repoUrl":"https://github.com/vous/votre-projet","market":"global"}'
 
@@ -267,6 +269,7 @@ gcloud run deploy market360 \
 - [x] Streaming SSE temps réel
 - [x] Support local/global avec données Sénégal
 - [x] Fallback Ollama local (sans clé API)
+- [x] Déploiement Cloud Run (GCP)
 - [ ] `TrendsAgent` — intégration web search live
 - [ ] `CreativeAgent` — génération d'images via fal.ai
 - [ ] Persistance PostgreSQL + cache Redis
