@@ -10,14 +10,14 @@ COPY market360-skills/pom.xml market360-skills/
 COPY market360-api/pom.xml market360-api/
 COPY market360-infra/pom.xml market360-infra/
 
-RUN ./mvnw dependency:go-offline -q
+RUN chmod +x mvnw && ./mvnw dependency:go-offline -q
 
 COPY market360-core/src market360-core/src
 COPY market360-agents/src market360-agents/src
 COPY market360-skills/src market360-skills/src
 COPY market360-api/src market360-api/src
 
-RUN ./mvnw -pl market360-api -am package -DskipTests --no-transfer-progress
+RUN ./mvnw -pl market360-api -am package -DskipTests --no-transfer-progress -q
 
 # ---- Stage 2 : Image finale ----
 FROM eclipse-temurin:25-jre
