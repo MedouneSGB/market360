@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -9,6 +9,48 @@
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     * { font-family: 'Inter', sans-serif; }
 
+    /* ---- Light / Dark tokens ---- */
+    :root {
+      --bg: #f8f9ff;
+      --bg2: #ffffff;
+      --border: rgba(0,0,0,0.07);
+      --card: #ffffff;
+      --text: #0f1117;
+      --muted: #6b7280;
+      --subtle: rgba(0,0,0,0.04);
+      --glow1: rgba(168,85,247,0.08);
+      --glow2: rgba(99,102,241,0.06);
+    }
+    html.dark {
+      --bg: #080b14;
+      --bg2: #0d1021;
+      --border: rgba(255,255,255,0.08);
+      --card: rgba(255,255,255,0.03);
+      --text: #f9fafb;
+      --muted: #6b7280;
+      --subtle: rgba(255,255,255,0.03);
+      --glow1: rgba(168,85,247,0.20);
+      --glow2: rgba(99,102,241,0.18);
+    }
+
+    body { background: var(--bg); color: var(--text); transition: background 0.3s, color 0.3s; }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(10px);
+      transition: background 0.3s, border 0.3s;
+    }
+    .input-field {
+      background: var(--subtle);
+      border: 1px solid var(--border);
+      color: var(--text);
+      transition: all 0.2s;
+    }
+    .input-field:focus { outline: none; border-color: rgba(168,85,247,0.4); }
+    .input-field::placeholder { color: var(--muted); }
+    .muted { color: var(--muted); }
+
     .gradient-text {
       background: linear-gradient(135deg, #a855f7, #6366f1, #3b82f6);
       -webkit-background-clip: text;
@@ -16,97 +58,144 @@
     }
     .gradient-bg { background: linear-gradient(135deg, #a855f7, #6366f1); }
 
-    .card {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.08);
-      backdrop-filter: blur(10px);
-    }
-
     /* Drawer */
     #drawer {
+      background: var(--bg2);
+      border-top: 1px solid var(--border);
       transform: translateY(100%);
-      transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+      transition: transform 0.45s cubic-bezier(0.32, 0.72, 0, 1), background 0.3s;
     }
     #drawer.open { transform: translateY(0); }
-
-    /* Overlay */
-    #overlay {
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
+    #overlay { opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
     #overlay.open { opacity: 1; pointer-events: all; }
 
-    .pulse { animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+    /* Loader bar */
+    #loaderBar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    #loaderFill {
+      height: 100%;
+      width: 0%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, #a855f7, #6366f1, #3b82f6);
+      transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+    }
+    #loaderFill::after {
+      content: '';
+      position: absolute;
+      right: 0; top: 0; bottom: 0;
+      width: 60px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6));
+      animation: shimmer 1.2s infinite;
+    }
+    @keyframes shimmer { 0%,100% { opacity:0.8; } 50% { opacity:0.2; } }
+
+    /* Spinner */
+    .spinner {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 3px solid var(--border);
+      border-top-color: #a855f7;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Agent steps */
+    .step-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: all 0.4s ease;
+    }
+    .step-dot.active { background: #a855f7; box-shadow: 0 0 8px rgba(168,85,247,0.6); animation: dotPulse 1.2s infinite; }
+    .step-dot.done { background: #22c55e; box-shadow: none; animation: none; }
+    @keyframes dotPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.4)} }
 
     .fade-in { animation: fadeIn 0.4s ease; }
     @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
 
-    /* Agent row */
-    .agent-line {
-      height: 3px;
-      background: rgba(255,255,255,0.06);
+    /* Theme toggle */
+    .theme-toggle {
+      width: 44px; height: 24px;
       border-radius: 99px;
-      overflow: hidden;
+      background: var(--border);
+      border: 1px solid var(--border);
+      position: relative;
+      cursor: pointer;
+      transition: background 0.3s;
     }
-    .agent-line-fill {
-      height: 100%;
-      width: 0%;
-      border-radius: 99px;
-      transition: width 1.2s ease;
-      background: linear-gradient(90deg, #a855f7, #6366f1);
+    .theme-toggle.dark-on { background: #6366f1; }
+    .theme-thumb {
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      background: white;
+      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px;
     }
+    .theme-toggle.dark-on .theme-thumb { transform: translateX(20px); }
 
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
   </style>
 </head>
-<body class="bg-[#080b14] text-white min-h-screen overflow-x-hidden">
+<body class="min-h-screen overflow-x-hidden">
 
   <!-- Background glow -->
   <div class="fixed inset-0 overflow-hidden pointer-events-none">
-    <div class="absolute top-[-20%] left-[10%] w-[600px] h-[600px] rounded-full bg-purple-900/20 blur-[120px]"></div>
-    <div class="absolute bottom-[-10%] right-[5%] w-[500px] h-[500px] rounded-full bg-indigo-900/20 blur-[120px]"></div>
+    <div class="absolute top-[-20%] left-[10%] w-[600px] h-[600px] rounded-full blur-[120px]" style="background:var(--glow1)"></div>
+    <div class="absolute bottom-[-10%] right-[5%] w-[500px] h-[500px] rounded-full blur-[120px]" style="background:var(--glow2)"></div>
   </div>
 
-  <!-- Main content -->
+  <!-- Main -->
   <div class="relative z-10 max-w-2xl mx-auto px-6 py-16">
 
     <!-- Header -->
+    <div class="flex justify-end mb-8">
+      <button onclick="toggleTheme()" id="themeToggle" class="theme-toggle flex items-center" title="Changer le thème">
+        <div class="theme-thumb">☀️</div>
+      </button>
+    </div>
+
     <div class="text-center mb-14">
-      <div class="inline-flex items-center gap-2 bg-purple-500/10 border border-purple-500/20 rounded-full px-4 py-1.5 text-sm text-purple-300 mb-6">
-        <span class="w-2 h-2 bg-green-400 rounded-full inline-block pulse"></span>
+      <div class="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-sm text-purple-600 mb-6" style="background:rgba(168,85,247,0.08); border:1px solid rgba(168,85,247,0.15)">
+        <span class="w-2 h-2 bg-green-500 rounded-full inline-block" style="animation:dotPulse 1.5s infinite"></span>
         Powered by Claude Sonnet 4.6
       </div>
       <h1 class="text-5xl font-bold mb-4"><span class="gradient-text">Market360</span></h1>
-      <p class="text-gray-400 text-lg max-w-xl mx-auto">
+      <p class="text-lg max-w-xl mx-auto muted">
         Donnez un repo GitHub. Obtenez un plan marketing complet — analyse produit, GTM, tendances et copy ads.
       </p>
     </div>
 
     <!-- Form -->
-    <div class="card rounded-2xl p-8">
+    <div class="card rounded-2xl p-8 shadow-sm">
       <div class="space-y-5">
         <div>
-          <label class="block text-sm font-medium text-gray-300 mb-2">URL du repo GitHub</label>
+          <label class="block text-sm font-medium mb-2">URL du repo GitHub</label>
           <input id="repoUrl" type="url" placeholder="https://github.com/owner/repo"
-            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500/50 transition-all" />
+            class="input-field w-full rounded-xl px-4 py-3" />
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-300 mb-2">Marché</label>
+            <label class="block text-sm font-medium mb-2">Marché</label>
             <select id="market" onchange="toggleLocation()"
-              class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500/50 transition-all appearance-none cursor-pointer">
-              <option value="global" class="bg-[#0f1219]">🌍 Global</option>
-              <option value="local" class="bg-[#0f1219]">📍 Local</option>
+              class="input-field w-full rounded-xl px-4 py-3 cursor-pointer appearance-none">
+              <option value="global">🌍 Global</option>
+              <option value="local">📍 Local</option>
             </select>
           </div>
           <div id="locationField" class="hidden">
-            <label class="block text-sm font-medium text-gray-300 mb-2">Ville / Pays</label>
+            <label class="block text-sm font-medium mb-2">Ville / Pays</label>
             <input id="location" type="text" placeholder="Dakar, Paris..."
-              class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-purple-500/50 transition-all" />
+              class="input-field w-full rounded-xl px-4 py-3" />
           </div>
         </div>
         <button onclick="startAnalysis()" id="analyzeBtn"
@@ -121,118 +210,113 @@
   </div>
 
   <!-- Overlay -->
-  <div id="overlay" class="fixed inset-0 bg-black/60 z-20 backdrop-blur-sm"></div>
+  <div id="overlay" class="fixed inset-0 z-20" style="background:rgba(0,0,0,0.3); backdrop-filter:blur(4px)"></div>
 
-  <!-- Drawer (slides from bottom) -->
-  <div id="drawer" class="fixed bottom-0 left-0 right-0 z-30 bg-[#0d1021] border-t border-white/10 rounded-t-3xl max-h-[90vh] flex flex-col">
+  <!-- Drawer -->
+  <div id="drawer" class="fixed bottom-0 left-0 right-0 z-30 rounded-t-3xl max-h-[90vh] flex flex-col shadow-2xl">
 
-    <!-- Drag handle -->
+    <!-- Handle -->
     <div class="flex justify-center pt-4 pb-2 shrink-0">
-      <div class="w-10 h-1 bg-white/20 rounded-full"></div>
+      <div class="w-10 h-1 rounded-full" style="background:var(--border)"></div>
     </div>
 
     <!-- Drawer header -->
     <div class="flex items-center justify-between px-6 py-3 shrink-0">
       <div>
         <h2 id="drawerTitle" class="text-base font-semibold">Analyse en cours...</h2>
-        <p id="drawerSubtitle" class="text-xs text-gray-500 mt-0.5">Les agents travaillent en parallèle</p>
+        <p id="drawerSubtitle" class="text-xs muted mt-0.5">Les agents IA travaillent pour vous</p>
       </div>
-      <button onclick="closeDrawer()" class="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 flex items-center justify-center transition-colors">
-        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <button onclick="closeDrawer()" class="w-8 h-8 rounded-full flex items-center justify-center transition-colors hover:opacity-70" style="background:var(--subtle)">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
         </svg>
       </button>
     </div>
 
-    <!-- Scrollable content -->
+    <!-- Scrollable -->
     <div class="overflow-y-auto flex-1 px-6 pb-8">
 
-      <!-- Progress agents -->
-      <div id="agentsPanel" class="space-y-4 py-4">
-        <div class="flex items-center gap-4 p-4 rounded-xl bg-white/3 border border-white/6" id="agent-analyst">
-          <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-lg shrink-0">🔍</div>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center justify-between mb-1">
-              <span class="text-sm font-medium">Analyst Agent</span>
-              <span class="agent-status text-xs text-gray-600">En attente</span>
-            </div>
-            <div class="agent-line"><div class="agent-line-fill"></div></div>
+      <!-- === LOADER PANEL === -->
+      <div id="loaderPanel" class="py-6 space-y-6">
+
+        <!-- Spinner + message dynamique -->
+        <div class="flex flex-col items-center gap-4 py-4">
+          <div class="spinner"></div>
+          <div class="text-center">
+            <p id="loaderComment" class="text-sm font-medium" style="min-height:20px">Initialisation du pipeline...</p>
+            <p class="text-xs muted mt-1" id="loaderSub">Connexion aux agents IA</p>
           </div>
         </div>
-        <div class="flex items-center gap-4 p-4 rounded-xl bg-white/3 border border-white/6" id="agent-strategist">
-          <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-lg shrink-0">🚀</div>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center justify-between mb-1">
-              <span class="text-sm font-medium">Strategist Agent</span>
-              <span class="agent-status text-xs text-gray-600">En attente</span>
-            </div>
-            <div class="agent-line"><div class="agent-line-fill"></div></div>
+
+        <!-- Barre de progression unique -->
+        <div>
+          <div class="flex justify-between text-xs muted mb-2">
+            <span id="loaderStep">Démarrage</span>
+            <span id="loaderPercent">0%</span>
+          </div>
+          <div id="loaderBar">
+            <div id="loaderFill"></div>
           </div>
         </div>
-        <div class="flex items-center gap-4 p-4 rounded-xl bg-white/3 border border-white/6" id="agent-trends">
-          <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-lg shrink-0">📈</div>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center justify-between mb-1">
-              <span class="text-sm font-medium">Trends Agent</span>
-              <span class="agent-status text-xs text-gray-600">En attente</span>
-            </div>
-            <div class="agent-line"><div class="agent-line-fill"></div></div>
+
+        <!-- Steps agents -->
+        <div class="space-y-3 pt-2">
+          <div class="flex items-center gap-3" id="step-analyst">
+            <div class="step-dot shrink-0"></div>
+            <span class="text-sm muted">Analyst — Analyse du repo GitHub</span>
           </div>
-        </div>
-        <div class="flex items-center gap-4 p-4 rounded-xl bg-white/3 border border-white/6" id="agent-creative">
-          <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-lg shrink-0">🎨</div>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center justify-between mb-1">
-              <span class="text-sm font-medium">Creative Agent</span>
-              <span class="agent-status text-xs text-gray-600">En attente</span>
-            </div>
-            <div class="agent-line"><div class="agent-line-fill"></div></div>
+          <div class="flex items-center gap-3" id="step-strategist">
+            <div class="step-dot shrink-0"></div>
+            <span class="text-sm muted">Strategist — Plan Go-To-Market</span>
+          </div>
+          <div class="flex items-center gap-3" id="step-trends">
+            <div class="step-dot shrink-0"></div>
+            <span class="text-sm muted">Trends — Veille marché</span>
+          </div>
+          <div class="flex items-center gap-3" id="step-creative">
+            <div class="step-dot shrink-0"></div>
+            <span class="text-sm muted">Creative — Copy publicitaire</span>
           </div>
         </div>
       </div>
 
-      <!-- Report (hidden until done) -->
-      <div id="reportPanel" class="hidden fade-in space-y-6 pt-2">
+      <!-- === REPORT PANEL === -->
+      <div id="reportPanel" class="hidden fade-in space-y-5 pt-2">
 
-        <!-- Product -->
-        <div class="rounded-2xl bg-white/3 border border-white/6 p-6">
+        <div class="rounded-2xl p-6" style="background:var(--subtle); border:1px solid var(--border)">
           <div class="flex items-center gap-3 mb-5">
-            <div class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-sm">📦</div>
+            <div class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-sm shrink-0">📦</div>
             <h3 class="font-semibold">Analyse Produit</h3>
           </div>
           <div id="productContent" class="space-y-4"></div>
         </div>
 
-        <!-- GTM -->
-        <div class="rounded-2xl bg-white/3 border border-white/6 p-6">
+        <div class="rounded-2xl p-6" style="background:var(--subtle); border:1px solid var(--border)">
           <div class="flex items-center gap-3 mb-5">
-            <div class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-sm">🚀</div>
+            <div class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-sm shrink-0">🚀</div>
             <h3 class="font-semibold">Plan Go-To-Market</h3>
           </div>
           <div id="gtmContent" class="space-y-4"></div>
         </div>
 
-        <!-- Trends -->
-        <div class="rounded-2xl bg-white/3 border border-white/6 p-6">
+        <div class="rounded-2xl p-6" style="background:var(--subtle); border:1px solid var(--border)">
           <div class="flex items-center gap-3 mb-5">
-            <div class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-sm">📈</div>
+            <div class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-sm shrink-0">📈</div>
             <h3 class="font-semibold">Tendances Marché</h3>
           </div>
           <div id="trendsContent" class="space-y-4"></div>
         </div>
 
-        <!-- Creative -->
-        <div class="rounded-2xl bg-white/3 border border-white/6 p-6">
+        <div class="rounded-2xl p-6" style="background:var(--subtle); border:1px solid var(--border)">
           <div class="flex items-center gap-3 mb-5">
-            <div class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-sm">🎨</div>
+            <div class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-sm shrink-0">🎨</div>
             <h3 class="font-semibold">Assets Créatifs</h3>
           </div>
           <div id="creativeContent" class="space-y-4"></div>
         </div>
 
-        <!-- New analysis -->
         <button onclick="closeDrawer()"
-          class="w-full border border-white/10 hover:border-white/20 rounded-xl py-3 text-sm text-gray-400 hover:text-white transition-all">
+          class="w-full rounded-xl py-3 text-sm transition-all muted hover:opacity-70" style="border:1px solid var(--border)">
           Analyser un autre repo
         </button>
       </div>
@@ -243,76 +327,102 @@
   <script>
     const BASE = '';
 
+    // ---- Theme ----
+    const toggle = document.getElementById('themeToggle');
+    const thumb = toggle.querySelector('.theme-thumb');
+    let dark = false;
+
+    function toggleTheme() {
+      dark = !dark;
+      document.documentElement.classList.toggle('dark', dark);
+      toggle.classList.toggle('dark-on', dark);
+      thumb.textContent = dark ? '🌙' : '☀️';
+    }
+
+    // ---- Form ----
     function toggleLocation() {
       document.getElementById('locationField').classList.toggle('hidden', document.getElementById('market').value !== 'local');
     }
 
+    // ---- Drawer ----
     function openDrawer() {
       document.getElementById('drawer').classList.add('open');
       document.getElementById('overlay').classList.add('open');
       document.body.style.overflow = 'hidden';
     }
-
     function closeDrawer() {
       document.getElementById('drawer').classList.remove('open');
       document.getElementById('overlay').classList.remove('open');
       document.body.style.overflow = '';
       resetBtn();
-      // Reset agents
-      ['analyst','strategist','trends','creative'].forEach(resetAgent);
-      document.getElementById('agentsPanel').classList.remove('hidden');
+      resetLoader();
+      document.getElementById('loaderPanel').classList.remove('hidden');
       document.getElementById('reportPanel').classList.add('hidden');
       document.getElementById('drawerTitle').textContent = 'Analyse en cours...';
-      document.getElementById('drawerSubtitle').textContent = 'Les agents travaillent en parallèle';
+      document.getElementById('drawerSubtitle').textContent = 'Les agents IA travaillent pour vous';
     }
 
-    function resetAgent(name) {
-      const row = document.getElementById('agent-' + name);
-      if (!row) return;
-      row.querySelector('.agent-status').textContent = 'En attente';
-      row.querySelector('.agent-status').className = 'agent-status text-xs text-gray-600';
-      row.querySelector('.agent-line-fill').style.width = '0%';
-      row.style.borderColor = 'rgba(255,255,255,0.06)';
-    }
+    // ---- Loader ----
+    const STEPS = {
+      analyst:    { pct: 25, step: 'Analyst Agent',    comment: "Lecture du README et des issues GitHub...", sub: "Extraction du stack, audience et USP" },
+      strategist: { pct: 55, step: 'Strategist Agent', comment: "Construction du plan Go-To-Market...",       sub: "Canaux, milestones et stratégie de prix" },
+      trends:     { pct: 75, step: 'Trends Agent',     comment: "Analyse des tendances marché...",            sub: "Concurrents, opportunités et menaces" },
+      creative:   { pct: 90, step: 'Creative Agent',   comment: "Rédaction du copy publicitaire...",          sub: "Headlines, variantes A/B et brief visuel" },
+    };
 
-    function setAgentStatus(agent, status) {
-      const row = document.getElementById('agent-' + agent);
-      if (!row) return;
-      const statusEl = row.querySelector('.agent-status');
-      const fill = row.querySelector('.agent-line-fill');
+    function setLoaderProgress(agent, status) {
+      const s = STEPS[agent];
+      if (!s) return;
+      const dot = document.querySelector(`#step-${agent} .step-dot`);
+      const label = document.querySelector(`#step-${agent} span`);
       if (status === 'running') {
-        statusEl.textContent = 'En cours...';
-        statusEl.className = 'agent-status text-xs text-purple-400';
-        fill.style.width = '60%';
-        row.style.borderColor = 'rgba(168,85,247,0.2)';
+        dot.className = 'step-dot shrink-0 active';
+        label.style.color = '#a855f7';
+        label.style.fontWeight = '500';
+        setBar(s.pct - 5, s.step, s.comment, s.sub);
       } else if (status === 'done') {
-        statusEl.textContent = 'Terminé ✓';
-        statusEl.className = 'agent-status text-xs text-green-400';
-        fill.style.width = '100%';
-        fill.style.background = 'linear-gradient(90deg, #22c55e, #16a34a)';
-        row.style.borderColor = 'rgba(34,197,94,0.15)';
-      } else if (status === 'error') {
-        statusEl.textContent = 'Erreur';
-        statusEl.className = 'agent-status text-xs text-red-400';
-        fill.style.background = '#ef4444';
-        fill.style.width = '100%';
+        dot.className = 'step-dot shrink-0 done';
+        label.style.color = '#22c55e';
+        setBar(s.pct, s.step + ' terminé', s.comment.replace('...', ' ✓'), '');
       }
     }
 
+    function setBar(pct, step, comment, sub) {
+      document.getElementById('loaderFill').style.width = pct + '%';
+      document.getElementById('loaderPercent').textContent = pct + '%';
+      document.getElementById('loaderStep').textContent = step;
+      document.getElementById('loaderComment').textContent = comment;
+      document.getElementById('loaderSub').textContent = sub;
+    }
+
+    function resetLoader() {
+      document.getElementById('loaderFill').style.width = '0%';
+      document.getElementById('loaderPercent').textContent = '0%';
+      document.getElementById('loaderStep').textContent = 'Démarrage';
+      document.getElementById('loaderComment').textContent = 'Initialisation du pipeline...';
+      document.getElementById('loaderSub').textContent = 'Connexion aux agents IA';
+      ['analyst','strategist','trends','creative'].forEach(a => {
+        const dot = document.querySelector(`#step-${a} .step-dot`);
+        const label = document.querySelector(`#step-${a} span`);
+        if (dot) { dot.className = 'step-dot shrink-0'; }
+        if (label) { label.style.color = ''; label.style.fontWeight = ''; }
+      });
+    }
+
+    // ---- Report rendering ----
     function tag(label, value) {
       if (!value) return '';
       return `<div>
-        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">${label}</p>
-        <p class="text-sm text-gray-200 leading-relaxed">${value}</p>
+        <p class="text-xs font-medium uppercase tracking-wider mb-1 muted">${label}</p>
+        <p class="text-sm leading-relaxed">${value}</p>
       </div>`;
     }
-
     function list(label, items) {
       if (!items?.length) return '';
       return `<div>
-        <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">${label}</p>
+        <p class="text-xs font-medium uppercase tracking-wider mb-2 muted">${label}</p>
         <ul class="space-y-1.5">
-          ${items.map(i => `<li class="text-sm text-gray-200 leading-relaxed flex gap-2"><span class="text-purple-400 shrink-0 mt-0.5">›</span><span>${i}</span></li>`).join('')}
+          ${items.map(i => `<li class="text-sm leading-relaxed flex gap-2"><span class="text-purple-500 shrink-0 mt-0.5">›</span><span>${i}</span></li>`).join('')}
         </ul>
       </div>`;
     }
@@ -320,73 +430,56 @@
     function renderReport(r) {
       const p = r.product;
       document.getElementById('productContent').innerHTML = `
-        <div class="mb-2">
-          <h4 class="text-xl font-bold">${p.name || ''}</h4>
-          ${p.githubStars !== undefined ? `<div class="flex gap-3 mt-1 text-xs text-gray-500"><span>⭐ ${p.githubStars} stars</span><span>🐛 ${p.openIssues} issues</span></div>` : ''}
+        <div class="mb-1">
+          <h4 class="text-xl font-bold">${p.name||''}</h4>
+          ${p.githubStars!==undefined?`<div class="flex gap-3 mt-1 text-xs muted"><span>⭐ ${p.githubStars} stars</span><span>🐛 ${p.openIssues} issues</span></div>`:''}
         </div>
-        ${tag('Description', p.description)}
-        ${tag('Stack', p.stack)}
-        ${tag('Audience', p.audience)}
-        ${tag('USP', p.usp)}
-        ${list('Fonctionnalités clés', p.keyFeatures)}`;
+        ${tag('Description',p.description)}${tag('Stack',p.stack)}${tag('Audience',p.audience)}${tag('USP',p.usp)}${list('Fonctionnalités clés',p.keyFeatures)}`;
 
       const g = r.gtmPlan;
-      document.getElementById('gtmContent').innerHTML = `
-        ${tag('Segment cible', g.targetSegment)}
-        ${tag('Positionnement', g.positioningStatement)}
-        ${list('Canaux prioritaires', g.channels)}
-        ${list('Milestones 90 jours', g.milestones)}
-        ${tag('Stratégie pricing', g.pricingStrategy)}
-        ${tag('Avantage concurrentiel', g.competitiveAdvantage)}`;
+      document.getElementById('gtmContent').innerHTML =
+        tag('Segment cible',g.targetSegment)+tag('Positionnement',g.positioningStatement)+
+        list('Canaux prioritaires',g.channels)+list('Milestones 90 jours',g.milestones)+
+        tag('Stratégie pricing',g.pricingStrategy)+tag('Avantage concurrentiel',g.competitiveAdvantage);
 
       const t = r.trends;
-      document.getElementById('trendsContent').innerHTML = `
-        ${list('Tendances', t.trends)}
-        ${list('Concurrents', t.competitors)}
-        ${list('Opportunités', t.opportunities)}
-        ${list('Menaces', t.threats)}`;
+      document.getElementById('trendsContent').innerHTML =
+        list('Tendances',t.trends)+list('Concurrents',t.competitors)+
+        list('Opportunités',t.opportunities)+list('Menaces',t.threats);
 
       const c = r.creative;
       document.getElementById('creativeContent').innerHTML = `
-        <div class="rounded-xl p-5 border border-purple-500/20 bg-purple-500/5 mb-2">
-          <p class="text-xl font-bold mb-1">${c.headline || ''}</p>
-          <p class="text-gray-400 text-sm">${c.subheadline || ''}</p>
-          ${c.cta ? `<span class="inline-block mt-3 gradient-bg text-white text-xs font-semibold px-4 py-1.5 rounded-full">${c.cta}</span>` : ''}
+        <div class="rounded-xl p-5 mb-2" style="background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.15)">
+          <p class="text-xl font-bold mb-1">${c.headline||''}</p>
+          <p class="text-sm muted">${c.subheadline||''}</p>
+          ${c.cta?`<span class="inline-block mt-3 gradient-bg text-white text-xs font-semibold px-4 py-1.5 rounded-full">${c.cta}</span>`:''}
         </div>
-        ${c.adVariants ? `
-          <div>
-            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-3">Variantes A/B</p>
-            <div class="space-y-3">
-              ${c.adVariants.map((v, i) => `
-                <div class="bg-white/3 border border-white/6 rounded-xl p-4">
-                  <span class="text-xs text-purple-400 font-semibold mb-2 block">Variante ${i+1}</span>
-                  <p class="text-sm text-gray-300 leading-relaxed whitespace-pre-line">${v}</p>
-                </div>`).join('')}
-            </div>
-          </div>` : ''}
-        ${c.visualBrief ? `
-          <div class="mt-2">
-            <p class="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">Brief Visuel</p>
-            <p class="text-sm text-gray-400 leading-relaxed italic">${c.visualBrief}</p>
-          </div>` : ''}`;
+        ${c.adVariants?`<div>
+          <p class="text-xs font-medium uppercase tracking-wider mb-3 muted">Variantes A/B</p>
+          <div class="space-y-3">
+            ${c.adVariants.map((v,i)=>`
+              <div class="rounded-xl p-4" style="background:var(--subtle);border:1px solid var(--border)">
+                <span class="text-xs text-purple-500 font-semibold mb-2 block">Variante ${i+1}</span>
+                <p class="text-sm leading-relaxed whitespace-pre-line">${v}</p>
+              </div>`).join('')}
+          </div></div>`:''}
+        ${c.visualBrief?`<div class="mt-2"><p class="text-xs font-medium uppercase tracking-wider mb-2 muted">Brief Visuel</p><p class="text-sm muted leading-relaxed italic">${c.visualBrief}</p></div>`:''}`;
     }
 
+    // ---- Main ----
     async function startAnalysis() {
       const repoUrl = document.getElementById('repoUrl').value.trim();
       if (!repoUrl) { document.getElementById('repoUrl').focus(); return; }
-
       const market = document.getElementById('market').value;
       const location = document.getElementById('location').value.trim();
 
-      // Reset + open drawer
-      ['analyst','strategist','trends','creative'].forEach(resetAgent);
-      document.getElementById('agentsPanel').classList.remove('hidden');
+      resetLoader();
+      document.getElementById('loaderPanel').classList.remove('hidden');
       document.getElementById('reportPanel').classList.add('hidden');
       document.getElementById('drawerTitle').textContent = 'Analyse en cours...';
-      document.getElementById('drawerSubtitle').textContent = 'Les agents travaillent en parallèle';
+      document.getElementById('drawerSubtitle').textContent = 'Les agents IA travaillent pour vous';
       openDrawer();
 
-      // Disable button
       const btn = document.getElementById('analyzeBtn');
       btn.disabled = true;
       btn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg> En cours...`;
@@ -396,46 +489,36 @@
         if (market === 'local' && location) body.location = location;
 
         const res = await fetch(`${BASE}/api/v1/analyze`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
         });
         const { jobId } = await res.json();
 
         const es = new EventSource(`${BASE}/api/v1/analyze/${jobId}/stream`);
         es.onmessage = (e) => {
           const data = JSON.parse(e.data);
-          if (data.agent && data.agent !== 'all') {
-            setAgentStatus(data.agent, data.status);
-          }
+          if (data.agent && data.agent !== 'all') setLoaderProgress(data.agent, data.status);
           if (data.agent === 'all' && data.status === 'done' && data.reportId) {
-            es.close();
-            fetchReport(data.reportId);
+            es.close(); fetchReport(data.reportId);
           }
           if (data.status === 'error') { es.close(); resetBtn(); }
         };
         es.onerror = () => { es.close(); resetBtn(); };
-      } catch(err) {
-        console.error(err);
-        resetBtn();
-      }
+      } catch(err) { console.error(err); resetBtn(); }
     }
 
     async function fetchReport(jobId) {
+      setBar(100, 'Rapport prêt !', 'Rapport marketing généré avec succès 🎉', '');
       try {
         const res = await fetch(`${BASE}/api/v1/analyze/${jobId}/report`);
         const report = await res.json();
         renderReport(report);
-
-        // Transition: hide agents, show report
-        document.getElementById('drawerTitle').textContent = 'Rapport prêt 🎉';
-        document.getElementById('drawerSubtitle').textContent = report.product?.name || '';
-        document.getElementById('agentsPanel').classList.add('hidden');
-        document.getElementById('reportPanel').classList.remove('hidden');
-        document.getElementById('reportPanel').classList.add('fade-in');
-      } catch(err) {
-        console.error(err);
-      }
+        setTimeout(() => {
+          document.getElementById('drawerTitle').textContent = 'Rapport prêt 🎉';
+          document.getElementById('drawerSubtitle').textContent = report.product?.name || '';
+          document.getElementById('loaderPanel').classList.add('hidden');
+          document.getElementById('reportPanel').classList.remove('hidden');
+        }, 600);
+      } catch(err) { console.error(err); }
       resetBtn();
     }
 
