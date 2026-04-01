@@ -78,6 +78,9 @@
                         <goals><goal>repackage</goal></goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <jvmArguments>--enable-preview</jvmArguments>
+                </configuration>
             </plugin>
         </plugins>
     </build>

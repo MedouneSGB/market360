@@ -1,0 +1,29 @@
+### Start analysis (global market)
+POST http://localhost:8083/api/v1/analyze
+Content-Type: application/json
+
+{
+  "repoUrl": "https://github.com/MedouneSGB/flash-transfer",
+  "market": "global"
+}
+
+### Start analysis (local market with location)
+POST http://localhost:8083/api/v1/analyze
+Content-Type: application/json
+
+{
+  "repoUrl": "https://github.com/MedouneSGB/flash-transfer",
+  "market": "local",
+  "location": "Dakar"
+}
+
+### Stream analysis progress (replace {{jobId}} with the value from the POST response)
+GET http://localhost:8083/api/v1/analyze/{{jobId}}/stream
+Accept: text/event-stream
+
+### Get final report
+GET http://localhost:8083/api/v1/analyze/{{jobId}}/report
+Accept: application/json
+
+### Health check
+GET http://localhost:8083/actuator/health

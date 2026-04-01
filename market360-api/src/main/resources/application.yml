@@ -26,7 +26,11 @@ management:
       show-details: always
 
 server:
-  port: 8080
+  port: 8083
+  servlet:
+    encoding:
+      charset: UTF-8
+      force: true
 
 github:
   token: ${GITHUB_TOKEN:}    # optionnel — 5000 req/h avec, 60 req/h sans

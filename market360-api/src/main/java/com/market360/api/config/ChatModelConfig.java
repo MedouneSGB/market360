@@ -1,5 +1,6 @@
 package com.market360.api.config;
 
+import org.springframework.ai.anthropic.AnthropicChatModel;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -28,5 +29,13 @@ public class ChatModelConfig {
     @ConditionalOnMissingBean(ChatClient.Builder.class)
     public ChatClient.Builder localChatClientBuilder(OllamaChatModel ollamaChatModel) {
         return ChatClient.builder(ollamaChatModel);
+    }
+
+    @Bean
+    @Profile("!local")
+    @Scope("prototype")
+    @ConditionalOnMissingBean(ChatClient.Builder.class)
+    public ChatClient.Builder defaultChatClientBuilder(AnthropicChatModel anthropicChatModel) {
+        return ChatClient.builder(anthropicChatModel);
     }
 }
