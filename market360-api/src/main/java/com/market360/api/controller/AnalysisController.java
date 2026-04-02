@@ -2,9 +2,13 @@ package com.market360.api.controller;
 
 import com.market360.agents.CMOAgent;
 import com.market360.agents.CMOAgent.AgentEvent;
+import com.market360.api.ratelimit.IpExtractor;
+import com.market360.api.ratelimit.RateLimitService;
 import com.market360.core.model.AnalysisRequest;
 import com.market360.core.model.MarketReport;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +33,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @RequestMapping("/api/v1")
 public class AnalysisController {
 
-    private final CMOAgent cmoAgent;
+    private final CMOAgent         cmoAgent;
+    private final RateLimitService rateLimitService;
 
     // Stockage en mémoire pour MVP — à remplacer par Redis en Phase 2
     private final Map<String, MarketReport>  reports  = new ConcurrentHashMap<>();
@@ -37,20 +42,36 @@ public class AnalysisController {
     // Buffer des events par jobId — permet le replay en cas de connexion tardive
     private final Map<String, List<Map<String, String>>> eventBuffers = new ConcurrentHashMap<>();
 
-    public AnalysisController(CMOAgent cmoAgent) {
-        this.cmoAgent = cmoAgent;
+    public AnalysisController(CMOAgent cmoAgent, RateLimitService rateLimitService) {
+        this.cmoAgent         = cmoAgent;
+        this.rateLimitService = rateLimitService;
     }
 
     @PostMapping("/analyze")
     public ResponseEntity<Map<String, String>> startAnalysis(
-            @Valid @RequestBody AnalysisRequest request
+            @Valid @RequestBody AnalysisRequest request,
+            HttpServletRequest httpRequest
     ) {
+        String ip = IpExtractor.extract(httpRequest);
+
+        if (!rateLimitService.tryConsume(ip)) {
+            return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                    .body(Map.of(
+                        "error",   "limit_exceeded",
+                        "message", "3 analyses par jour maximum. Revenez demain !",
+                        "remaining", "0"
+                    ));
+        }
+
         String jobId = UUID.randomUUID().toString();
         eventBuffers.put(jobId, Collections.synchronizedList(new ArrayList<>()));
 
         Thread.ofVirtual().name("analysis-" + jobId).start(() -> runAnalysis(jobId, request));
 
-        return ResponseEntity.accepted().body(Map.of("jobId", jobId));
+        return ResponseEntity.accepted().body(Map.of(
+            "jobId",     jobId,
+            "remaining", String.valueOf(rateLimitService.remaining(ip))
+        ));
     }
 
     @GetMapping(value = "/analyze/{jobId}/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

@@ -236,6 +236,16 @@
           </svg>
           <span>Analyser ce repo</span>
         </button>
+
+        <!-- Message rate limit -->
+        <div id="rateLimitMsg" class="hidden text-center text-sm font-medium py-2 px-4 rounded-xl"
+          style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);color:#ef4444">
+        </div>
+
+        <!-- Crédits restants -->
+        <p id="remainingBadge" class="hidden text-center text-xs muted">
+          analyses restantes aujourd'hui
+        </p>
       </div>
     </div>
 
@@ -647,7 +657,16 @@
         const res = await fetch(`${BASE}/api/v1/analyze`, {
           method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
         });
-        const { jobId } = await res.json();
+
+        if (res.status === 429) {
+          const data = await res.json();
+          showRateLimit(data.message);
+          resetBtn();
+          return;
+        }
+
+        const { jobId, remaining } = await res.json();
+        if (remaining !== undefined) updateRemainingBadge(remaining);
         const es = new EventSource(`${BASE}/api/v1/analyze/${jobId}/stream`);
         es.onmessage = (e) => {
           const data = JSON.parse(e.data);
@@ -679,6 +698,20 @@
       const btn = document.getElementById('analyzeBtn');
       btn.disabled = false;
       btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> <span>${t('btnAnalyze')}</span>`;
+    }
+
+    function showRateLimit(msg) {
+      const el = document.getElementById('rateLimitMsg');
+      el.textContent = msg || '3 analyses par jour maximum. Revenez demain !';
+      el.classList.remove('hidden');
+      setTimeout(() => el.classList.add('hidden'), 8000);
+    }
+
+    function updateRemainingBadge(n) {
+      const el = document.getElementById('remainingBadge');
+      if (!el || n === undefined) return;
+      el.textContent = `${n}/3 analyses restantes aujourd'hui`;
+      el.classList.remove('hidden');
     }
   </script>
 </body>
