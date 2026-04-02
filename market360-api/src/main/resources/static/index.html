@@ -642,11 +642,6 @@
       const market = document.getElementById('market').value;
       const location = document.getElementById('location').value.trim();
 
-      resetLoader();
-      document.getElementById('loaderPanel').classList.remove('hidden');
-      document.getElementById('reportPanel').classList.add('hidden');
-      openDrawer();
-
       const btn = document.getElementById('analyzeBtn');
       btn.disabled = true;
       btn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg> <span>${t('btnAnalyzing')}</span>`;
@@ -661,9 +656,15 @@
         if (res.status === 429) {
           const data = await res.json();
           showRateLimit(data.message);
-          resetBtn();
+          blockBtn();
           return;
         }
+
+        // Succès — on ouvre le drawer seulement maintenant
+        resetLoader();
+        document.getElementById('loaderPanel').classList.remove('hidden');
+        document.getElementById('reportPanel').classList.add('hidden');
+        openDrawer();
 
         const { jobId, remaining } = await res.json();
         if (remaining !== undefined) updateRemainingBadge(remaining);
@@ -698,6 +699,15 @@
       const btn = document.getElementById('analyzeBtn');
       btn.disabled = false;
       btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> <span>${t('btnAnalyze')}</span>`;
+    }
+
+    function blockBtn() {
+      const btn = document.getElementById('analyzeBtn');
+      btn.disabled = true;
+      btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m0 0v2m0-2h2m-2 0H10m9-7a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> <span>Limite atteinte — revenez demain</span>`;
+      btn.style.background = 'var(--border)';
+      btn.style.boxShadow = 'none';
+      btn.style.color = 'var(--muted)';
     }
 
     function showRateLimit(msg) {
