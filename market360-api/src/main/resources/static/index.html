@@ -147,6 +147,10 @@
     html.light .badge { background:rgba(139,92,246,0.07); border:1px solid rgba(139,92,246,0.15); color:#7c3aed; }
     html.dark .badge { background:rgba(139,92,246,0.12); border:1px solid rgba(139,92,246,0.2); color:#a78bfa; }
 
+    /* ---- Language toggle ---- */
+    .lang-btn { color: var(--muted); background: transparent; cursor: pointer; }
+    .lang-btn.active-lang { background: linear-gradient(135deg,#8b5cf6,#6366f1); color: white; }
+
     ::-webkit-scrollbar { width:3px; }
     ::-webkit-scrollbar-track { background:transparent; }
     ::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
@@ -174,9 +178,19 @@
         </div>
         <span class="font-bold text-sm tracking-tight">Market360</span>
       </div>
-      <button onclick="toggleTheme()" id="themeToggle" class="theme-toggle">
-        <div class="theme-thumb">☀️</div>
-      </button>
+      <div class="flex items-center gap-3">
+        <!-- Language toggle -->
+        <div class="flex items-center rounded-xl overflow-hidden" style="border:1px solid var(--border)">
+          <button id="btnFR" onclick="setLang('fr')"
+            class="px-3 py-1.5 text-xs font-semibold transition-all lang-btn active-lang">FR</button>
+          <button id="btnEN" onclick="setLang('en')"
+            class="px-3 py-1.5 text-xs font-semibold transition-all lang-btn">EN</button>
+        </div>
+        <!-- Theme toggle -->
+        <button onclick="toggleTheme()" id="themeToggle" class="theme-toggle">
+          <div class="theme-thumb">☀️</div>
+        </button>
+      </div>
     </nav>
 
     <!-- Hero -->
@@ -187,11 +201,11 @@
       </div>
 
       <h1 class="text-5xl font-black mb-4 leading-[1.08] tracking-tight">
-        Votre plan marketing<br/>
-        <span class="gradient-text">en quelques minutes</span>
+        <span id="hero-h1a">Votre plan marketing</span><br/>
+        <span class="gradient-text" id="hero-h1b">en quelques minutes</span>
       </h1>
 
-      <p class="text-base muted max-w-md mx-auto leading-relaxed">
+      <p id="hero-subtitle" class="text-base muted max-w-md mx-auto leading-relaxed">
         Collez un repo GitHub et obtenez un plan marketing complet — prêt à exécuter.
       </p>
     </div>
@@ -218,7 +232,7 @@
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
           </svg>
-          Analyser ce repo
+          <span>Analyser ce repo</span>
         </button>
       </div>
     </div>
@@ -228,22 +242,22 @@
       <div class="agent-card rounded-2xl p-4 text-center">
         <div class="text-2xl mb-2">🔍</div>
         <p class="text-xs font-semibold mb-0.5">Analyst</p>
-        <p class="text-xs muted">Analyse repo</p>
+        <p id="agent-analyst-label" class="text-xs muted">Analyse repo</p>
       </div>
       <div class="agent-card rounded-2xl p-4 text-center">
         <div class="text-2xl mb-2">🚀</div>
         <p class="text-xs font-semibold mb-0.5">Strategist</p>
-        <p class="text-xs muted">Plan GTM</p>
+        <p id="agent-strategist-label" class="text-xs muted">Plan GTM</p>
       </div>
       <div class="agent-card rounded-2xl p-4 text-center">
         <div class="text-2xl mb-2">📈</div>
         <p class="text-xs font-semibold mb-0.5">Trends</p>
-        <p class="text-xs muted">Veille marché</p>
+        <p id="agent-trends-label" class="text-xs muted">Veille marché</p>
       </div>
       <div class="agent-card rounded-2xl p-4 text-center">
         <div class="text-2xl mb-2">🎨</div>
         <p class="text-xs font-semibold mb-0.5">Creative</p>
-        <p class="text-xs muted">Copy & ads</p>
+        <p id="agent-creative-label" class="text-xs muted">Copy & ads</p>
       </div>
     </div>
 
@@ -318,7 +332,7 @@
         <div class="rounded-2xl p-6 card">
           <div class="flex items-center gap-3 mb-5">
             <div class="w-8 h-8 rounded-xl gradient-bg flex items-center justify-center text-sm shrink-0">📦</div>
-            <h3 class="font-bold">Analyse Produit</h3>
+            <h3 id="section-product" class="font-bold">Analyse Produit</h3>
           </div>
           <div id="productContent" class="space-y-4"></div>
         </div>
@@ -326,7 +340,7 @@
         <div class="rounded-2xl p-6 card">
           <div class="flex items-center gap-3 mb-5">
             <div class="w-8 h-8 rounded-xl gradient-bg flex items-center justify-center text-sm shrink-0">🚀</div>
-            <h3 class="font-bold">Plan Go-To-Market</h3>
+            <h3 id="section-gtm" class="font-bold">Plan Go-To-Market</h3>
           </div>
           <div id="gtmContent" class="space-y-4"></div>
         </div>
@@ -334,7 +348,7 @@
         <div class="rounded-2xl p-6 card">
           <div class="flex items-center gap-3 mb-5">
             <div class="w-8 h-8 rounded-xl gradient-bg flex items-center justify-center text-sm shrink-0">📈</div>
-            <h3 class="font-bold">Tendances Marché</h3>
+            <h3 id="section-trends" class="font-bold">Tendances Marché</h3>
           </div>
           <div id="trendsContent" class="space-y-4"></div>
         </div>
@@ -342,12 +356,12 @@
         <div class="rounded-2xl p-6 card">
           <div class="flex items-center gap-3 mb-5">
             <div class="w-8 h-8 rounded-xl gradient-bg flex items-center justify-center text-sm shrink-0">🎨</div>
-            <h3 class="font-bold">Assets Créatifs</h3>
+            <h3 id="section-creative" class="font-bold">Assets Créatifs</h3>
           </div>
           <div id="creativeContent" class="space-y-4"></div>
         </div>
 
-        <button onclick="closeDrawer()"
+        <button id="btnReset" onclick="closeDrawer()"
           class="w-full rounded-xl py-3 text-sm font-medium transition-all muted hover:opacity-60" style="border:1px solid var(--border)">
           Analyser un autre repo
         </button>
@@ -357,6 +371,136 @@
 
   <script>
     const BASE = '';
+
+    // ---- i18n ----
+    let currentLang = 'fr';
+
+    const I18N = {
+      fr: {
+        badge: 'Intelligence Marketing par IA',
+        h1a: 'Votre plan marketing',
+        h1b: 'en quelques minutes',
+        subtitle: 'Collez un repo GitHub et obtenez un plan marketing complet — prêt à exécuter.',
+        placeholder: 'https://github.com/owner/repo',
+        marketGlobal: '🌍 Global', marketLocal: '📍 Local',
+        locationPlaceholder: 'Dakar, Paris, New York...',
+        btnAnalyze: 'Analyser ce repo',
+        btnAnalyzing: 'Analyse en cours...',
+        drawerRunning: 'Analyse en cours...',
+        drawerSub: 'Les agents IA travaillent pour vous',
+        drawerDone: 'Rapport prêt 🎉',
+        stepAnalyst: 'Analyst — Analyse du repo GitHub',
+        stepStrategist: 'Strategist — Plan Go-To-Market',
+        stepTrends: 'Trends — Veille marché',
+        stepCreative: 'Creative — Copy publicitaire',
+        loaderInit: 'Initialisation du pipeline...',
+        loaderInitSub: 'Connexion aux agents IA',
+        loaderStart: 'Démarrage',
+        loaderDone: 'Rapport prêt !',
+        loaderDoneSub: 'Rapport généré avec succès 🎉',
+        btnReset: 'Analyser un autre repo',
+        sectionProduct: 'Analyse Produit',
+        sectionGTM: 'Plan Go-To-Market',
+        sectionTrends: 'Tendances Marché',
+        sectionCreative: 'Assets Créatifs',
+        labelDesc: 'Description', labelStack: 'Stack', labelAudience: 'Audience',
+        labelUSP: 'USP', labelFeatures: 'Fonctionnalités', labelSegment: 'Segment cible',
+        labelPositioning: 'Positionnement', labelChannels: 'Canaux', labelMilestones: 'Milestones',
+        labelPricing: 'Pricing', labelAdvantage: 'Avantage concurrentiel',
+        labelTrends: 'Tendances', labelCompetitors: 'Concurrents',
+        labelOpportunities: 'Opportunités', labelThreats: 'Menaces',
+        labelVariants: 'Variantes A/B', labelVariant: 'Variante',
+        labelVisualBrief: 'Brief Visuel',
+        agentAnalyst: 'Analyse repo', agentStrategist: 'Plan GTM',
+        agentTrends: 'Veille marché', agentCreative: 'Copy & ads',
+        steps: {
+          analyst:    { pct:25, step:'Analyst Agent',    comment:'Lecture du README et des issues GitHub...', sub:'Extraction du stack, audience et USP' },
+          strategist: { pct:55, step:'Strategist Agent', comment:'Construction du plan Go-To-Market...', sub:'Canaux, milestones et stratégie de prix' },
+          trends:     { pct:75, step:'Trends Agent',     comment:'Analyse des tendances marché...', sub:'Concurrents, opportunités et menaces' },
+          creative:   { pct:90, step:'Creative Agent',   comment:'Rédaction du copy publicitaire...', sub:'Headlines, variantes A/B et brief visuel' },
+        }
+      },
+      en: {
+        badge: 'AI Marketing Intelligence',
+        h1a: 'Your marketing plan',
+        h1b: 'in minutes',
+        subtitle: 'Paste a GitHub repo and get a full marketing plan — ready to execute.',
+        placeholder: 'https://github.com/owner/repo',
+        marketGlobal: '🌍 Global', marketLocal: '📍 Local',
+        locationPlaceholder: 'Dakar, Paris, New York...',
+        btnAnalyze: 'Analyze this repo',
+        btnAnalyzing: 'Analyzing...',
+        drawerRunning: 'Analysis in progress...',
+        drawerSub: 'AI agents are working for you',
+        drawerDone: 'Report ready 🎉',
+        stepAnalyst: 'Analyst — GitHub repo analysis',
+        stepStrategist: 'Strategist — Go-To-Market plan',
+        stepTrends: 'Trends — Market intelligence',
+        stepCreative: 'Creative — Ad copywriting',
+        loaderInit: 'Initializing pipeline...',
+        loaderInitSub: 'Connecting to AI agents',
+        loaderStart: 'Starting',
+        loaderDone: 'Report ready!',
+        loaderDoneSub: 'Report successfully generated 🎉',
+        btnReset: 'Analyze another repo',
+        sectionProduct: 'Product Analysis',
+        sectionGTM: 'Go-To-Market Plan',
+        sectionTrends: 'Market Trends',
+        sectionCreative: 'Creative Assets',
+        labelDesc: 'Description', labelStack: 'Stack', labelAudience: 'Audience',
+        labelUSP: 'USP', labelFeatures: 'Features', labelSegment: 'Target segment',
+        labelPositioning: 'Positioning', labelChannels: 'Channels', labelMilestones: 'Milestones',
+        labelPricing: 'Pricing', labelAdvantage: 'Competitive advantage',
+        labelTrends: 'Trends', labelCompetitors: 'Competitors',
+        labelOpportunities: 'Opportunities', labelThreats: 'Threats',
+        labelVariants: 'A/B Variants', labelVariant: 'Variant',
+        labelVisualBrief: 'Visual Brief',
+        agentAnalyst: 'Repo analysis', agentStrategist: 'GTM plan',
+        agentTrends: 'Market intel', agentCreative: 'Copy & ads',
+        steps: {
+          analyst:    { pct:25, step:'Analyst Agent',    comment:'Reading README and GitHub issues...', sub:'Extracting stack, audience and USP' },
+          strategist: { pct:55, step:'Strategist Agent', comment:'Building Go-To-Market plan...', sub:'Channels, milestones and pricing strategy' },
+          trends:     { pct:75, step:'Trends Agent',     comment:'Analyzing market trends...', sub:'Competitors, opportunities and threats' },
+          creative:   { pct:90, step:'Creative Agent',   comment:'Writing ad copy...', sub:'Headlines, A/B variants and visual brief' },
+        }
+      }
+    };
+
+    function t(key) { return I18N[currentLang][key] || key; }
+
+    function setLang(lang) {
+      currentLang = lang;
+      document.getElementById('btnFR').classList.toggle('active-lang', lang === 'fr');
+      document.getElementById('btnEN').classList.toggle('active-lang', lang === 'en');
+      applyI18n();
+    }
+
+    function applyI18n() {
+      const l = I18N[currentLang];
+      document.querySelector('.badge span:last-child')?.replaceWith(document.createTextNode(' ' + l.badge));
+      document.getElementById('hero-h1a').textContent = l.h1a;
+      document.getElementById('hero-h1b').textContent = l.h1b;
+      document.getElementById('hero-subtitle').textContent = l.subtitle;
+      document.getElementById('repoUrl').placeholder = l.placeholder;
+      document.getElementById('location').placeholder = l.locationPlaceholder;
+      document.getElementById('analyzeBtn').querySelector('span').textContent = l.btnAnalyze;
+      document.getElementById('agent-analyst-label').textContent = l.agentAnalyst;
+      document.getElementById('agent-strategist-label').textContent = l.agentStrategist;
+      document.getElementById('agent-trends-label').textContent = l.agentTrends;
+      document.getElementById('agent-creative-label').textContent = l.agentCreative;
+      document.getElementById('step-analyst').querySelector('span').textContent = l.stepAnalyst;
+      document.getElementById('step-strategist').querySelector('span').textContent = l.stepStrategist;
+      document.getElementById('step-trends').querySelector('span').textContent = l.stepTrends;
+      document.getElementById('step-creative').querySelector('span').textContent = l.stepCreative;
+      document.getElementById('btnReset').textContent = l.btnReset;
+      document.getElementById('section-product').textContent = l.sectionProduct;
+      document.getElementById('section-gtm').textContent = l.sectionGTM;
+      document.getElementById('section-trends').textContent = l.sectionTrends;
+      document.getElementById('section-creative').textContent = l.sectionCreative;
+      // market options
+      document.querySelector('#market option[value="global"]').textContent = l.marketGlobal;
+      document.querySelector('#market option[value="local"]').textContent = l.marketLocal;
+    }
 
     // Theme
     const toggle = document.getElementById('themeToggle');
@@ -389,15 +533,10 @@
       document.getElementById('drawerSubtitle').textContent = 'Les agents IA travaillent pour vous';
     }
 
-    const STEPS = {
-      analyst:    { pct:25, step:'Analyst Agent',    comment:'Lecture du README et des issues GitHub...', sub:'Extraction du stack, audience et USP' },
-      strategist: { pct:55, step:'Strategist Agent', comment:'Construction du plan Go-To-Market...', sub:'Canaux, milestones et stratégie de prix' },
-      trends:     { pct:75, step:'Trends Agent',     comment:'Analyse des tendances marché...', sub:'Concurrents, opportunités et menaces' },
-      creative:   { pct:90, step:'Creative Agent',   comment:'Rédaction du copy publicitaire...', sub:'Headlines, variantes A/B et brief visuel' },
-    };
+    function STEPS() { return I18N[currentLang].steps; }
 
     function setLoaderProgress(agent, status) {
-      const s = STEPS[agent];
+      const s = STEPS()[agent];
       if (!s) return;
       const dot = document.querySelector(`#step-${agent} .step-dot`);
       const label = document.querySelector(`#step-${agent} span`);
@@ -419,7 +558,7 @@
       if (sub !== undefined) document.getElementById('loaderSub').textContent = sub;
     }
     function resetLoader() {
-      setBar(0, 'Démarrage', 'Initialisation du pipeline...', 'Connexion aux agents IA');
+      setBar(0, t('loaderStart'), t('loaderInit'), t('loaderInitSub'));
       ['analyst','strategist','trends','creative'].forEach(a => {
         const dot = document.querySelector(`#step-${a} .step-dot`);
         const label = document.querySelector(`#step-${a} span`);
@@ -446,24 +585,25 @@
     }
 
     function renderReport(r) {
+      const l = I18N[currentLang];
       const p = r.product;
       document.getElementById('productContent').innerHTML = `
         <div class="mb-1">
           <h4 class="text-xl font-black">${p.name||''}</h4>
           ${p.githubStars!==undefined?`<div class="flex gap-3 mt-1 text-xs muted"><span>⭐ ${p.githubStars} stars</span><span>🐛 ${p.openIssues} issues</span></div>`:''}
         </div>
-        ${tag('Description',p.description)}${tag('Stack',p.stack)}${tag('Audience',p.audience)}${tag('USP',p.usp)}${list('Fonctionnalités',p.keyFeatures)}`;
+        ${tag(l.labelDesc,p.description)}${tag(l.labelStack,p.stack)}${tag(l.labelAudience,p.audience)}${tag(l.labelUSP,p.usp)}${list(l.labelFeatures,p.keyFeatures)}`;
 
       const g = r.gtmPlan;
       document.getElementById('gtmContent').innerHTML =
-        tag('Segment cible',g.targetSegment)+tag('Positionnement',g.positioningStatement)+
-        list('Canaux',g.channels)+list('Milestones',g.milestones)+
-        tag('Pricing',g.pricingStrategy)+tag('Avantage concurrentiel',g.competitiveAdvantage);
+        tag(l.labelSegment,g.targetSegment)+tag(l.labelPositioning,g.positioningStatement)+
+        list(l.labelChannels,g.channels)+list(l.labelMilestones,g.milestones)+
+        tag(l.labelPricing,g.pricingStrategy)+tag(l.labelAdvantage,g.competitiveAdvantage);
 
-      const t = r.trends;
+      const tr = r.trends;
       document.getElementById('trendsContent').innerHTML =
-        list('Tendances',t.trends)+list('Concurrents',t.competitors)+
-        list('Opportunités',t.opportunities)+list('Menaces',t.threats);
+        list(l.labelTrends,tr.trends)+list(l.labelCompetitors,tr.competitors)+
+        list(l.labelOpportunities,tr.opportunities)+list(l.labelThreats,tr.threats);
 
       const c = r.creative;
       document.getElementById('creativeContent').innerHTML = `
@@ -473,15 +613,15 @@
           ${c.cta?`<span class="inline-block mt-3 gradient-bg text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm shadow-violet-500/20">${c.cta}</span>`:''}
         </div>
         ${c.adVariants?`<div>
-          <p class="text-xs font-semibold uppercase tracking-wider mb-3 muted">Variantes A/B</p>
+          <p class="text-xs font-semibold uppercase tracking-wider mb-3 muted">${l.labelVariants}</p>
           <div class="space-y-2.5">
             ${c.adVariants.map((v,i)=>`
               <div class="rounded-xl p-4" style="background:var(--subtle);border:1px solid var(--border)">
-                <span class="text-xs font-bold text-violet-500 mb-2 block">Variante ${i+1}</span>
+                <span class="text-xs font-bold text-violet-500 mb-2 block">${l.labelVariant} ${i+1}</span>
                 <p class="text-sm leading-relaxed whitespace-pre-line">${v}</p>
               </div>`).join('')}
           </div></div>`:''}
-        ${c.visualBrief?`<div class="mt-3"><p class="text-xs font-semibold uppercase tracking-wider mb-2 muted">Brief Visuel</p><p class="text-sm muted leading-relaxed italic">${c.visualBrief}</p></div>`:''}`;
+        ${c.visualBrief?`<div class="mt-3"><p class="text-xs font-semibold uppercase tracking-wider mb-2 muted">${l.labelVisualBrief}</p><p class="text-sm muted leading-relaxed italic">${c.visualBrief}</p></div>`:''}`;
     }
 
     async function startAnalysis() {
@@ -497,10 +637,10 @@
 
       const btn = document.getElementById('analyzeBtn');
       btn.disabled = true;
-      btn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg> Analyse en cours...`;
+      btn.innerHTML = `<svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg> <span>${t('btnAnalyzing')}</span>`;
 
       try {
-        const body = { repoUrl, market };
+        const body = { repoUrl, market, language: currentLang };
         if (market === 'local' && location) body.location = location;
         const res = await fetch(`${BASE}/api/v1/analyze`, {
           method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)
@@ -518,13 +658,13 @@
     }
 
     async function fetchReport(jobId) {
-      setBar(100, 'Rapport prêt !', 'Rapport généré avec succès 🎉', '');
+      setBar(100, t('loaderDone'), t('loaderDoneSub'), '');
       try {
         const res = await fetch(`${BASE}/api/v1/analyze/${jobId}/report`);
         const report = await res.json();
         renderReport(report);
         setTimeout(() => {
-          document.getElementById('drawerTitle').textContent = 'Rapport prêt 🎉';
+          document.getElementById('drawerTitle').textContent = t('drawerDone');
           document.getElementById('drawerSubtitle').textContent = report.product?.name || '';
           document.getElementById('loaderPanel').classList.add('hidden');
           document.getElementById('reportPanel').classList.remove('hidden');
@@ -536,7 +676,7 @@
     function resetBtn() {
       const btn = document.getElementById('analyzeBtn');
       btn.disabled = false;
-      btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> Analyser ce repo`;
+      btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> <span>${t('btnAnalyze')}</span>`;
     }
   </script>
 </body>

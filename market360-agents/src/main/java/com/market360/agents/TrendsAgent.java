@@ -21,23 +21,25 @@ public class TrendsAgent {
         this.converter = new RobustEntityConverter(mapper);
     }
 
-    public MarketTrends fetch(ProductBrief brief, String market, String location) {
+    public MarketTrends fetch(ProductBrief brief, String market, String location, String language) {
         String scope    = market == null ? "global" : market;
         String geoLabel = "global".equals(scope) ? "worldwide" : location;
 
         var spec = chatClient.prompt()
                 .user(u -> u.text("""
-                        Produit : {name} — {description}
-                        Stack : {stack}
-                        Marché : {scope} ({location})
+                        Product: {name} — {description}
+                        Stack: {stack}
+                        Market: {scope} ({location})
 
-                        Analyse le marché.
+                        Analyze the market.
+                        IMPORTANT: Write ALL JSON string values in {language}.
                         """)
                         .param("name",        brief.name())
                         .param("description", brief.description())
                         .param("stack",       brief.stack())
                         .param("scope",       scope)
-                        .param("location",    geoLabel))
+                        .param("location",    geoLabel)
+                        .param("language",    language))
                 .call();
 
         return converter.convert(spec, MarketTrends.class);

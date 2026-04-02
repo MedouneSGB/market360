@@ -42,9 +42,11 @@ public class CMOAgent {
     public MarketReport orchestrate(AnalysisRequest request, Consumer<AgentEvent> onEvent)
             throws Exception {
 
+        final String lang = request.languageName();
+
         // Phase 1 — Analyst (séquentiel, les autres agents en dépendent)
         onEvent.accept(new AgentEvent("analyst", "running", "Analyse du repo GitHub..."));
-        var brief = analystAgent.analyze(request.repoUrl());
+        var brief = analystAgent.analyze(request.repoUrl(), lang);
         onEvent.accept(new AgentEvent("analyst", "done", "Analyse terminée"));
 
         // Phase 2 — GTM + Trends en parallèle (Java 25 : open() = ShutdownOnFailure)
@@ -54,8 +56,8 @@ public class CMOAgent {
         GTMPlan      gtm;
         MarketTrends trends;
         try (var scope = StructuredTaskScope.open()) {
-            var gtmTask    = scope.fork(() -> strategistAgent.buildGTM(brief));
-            var trendsTask = scope.fork(() -> trendsAgent.fetch(brief, request.market(), request.location()));
+            var gtmTask    = scope.fork(() -> strategistAgent.buildGTM(brief, lang));
+            var trendsTask = scope.fork(() -> trendsAgent.fetch(brief, request.market(), request.location(), lang));
             scope.join();   // lève FailedException si l'un des agents échoue
             gtm    = gtmTask.get();
             trends = trendsTask.get();
@@ -66,7 +68,7 @@ public class CMOAgent {
 
         // Phase 3 — Creative (nécessite le GTM)
         onEvent.accept(new AgentEvent("creative", "running", "Génération du copy créatif..."));
-        var creative = creativeAgent.generate(brief, gtm);
+        var creative = creativeAgent.generate(brief, gtm, lang);
         onEvent.accept(new AgentEvent("creative", "done", "Assets créatifs générés"));
 
         return MarketReport.from(brief, gtm, trends, creative);

@@ -28,19 +28,19 @@ public class AnalystAgent {
         this.converter = new RobustEntityConverter(mapper);
     }
 
-    public ProductBrief analyze(String repoUrl) {
+    public ProductBrief analyze(String repoUrl, String language) {
         log.debug("Fetching GitHub context for {}", repoUrl);
         RepoContext ctx = gitHubClient.fetchRepoContext(repoUrl);
         log.info("GitHub context fetched: {}", ctx.summary());
 
         var spec = chatClient.prompt()
-                .user(u -> u.text(buildPrompt(ctx)))
+                .user(u -> u.text(buildPrompt(ctx, language)))
                 .call();
 
         return converter.convert(spec, ProductBrief.class);
     }
 
-    private String buildPrompt(RepoContext ctx) {
+    private String buildPrompt(RepoContext ctx, String language) {
         String readme = ctx.readmeContent().length() > 8_000
                 ? ctx.readmeContent().substring(0, 8_000) + "\n\n[README tronqué]"
                 : ctx.readmeContent();
@@ -58,9 +58,12 @@ public class AnalystAgent {
 
                 ## README Content
                 %s
+
+                IMPORTANT: Write ALL JSON string values in %s.
                 """.formatted(
                 ctx.repoUrl(), ctx.name(), ctx.description(),
                 ctx.primaryLanguage(), String.join(", ", ctx.topics()),
-                ctx.stars(), ctx.openIssues(), ctx.forks(), readme);
+                ctx.stars(), ctx.openIssues(), ctx.forks(), readme,
+                language);
     }
 }

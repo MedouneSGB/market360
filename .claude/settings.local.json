@@ -10,7 +10,12 @@
       "Bash(/tmp/TestScopeError.java:*)",
       "Bash(jar tf:*)",
       "Bash(taskkill:*)",
-      "Bash(ping:*)"
+      "Bash(ping:*)",
+      "Bash(java -version)",
+      "Bash(where java:*)",
+      "Bash(\"C:\\\\Users\\\\MSGB\\\\Documents\\\\GitHub\\\\market360\\\\market360-api\\\\src\\\\test\\\\http\\\\analyze.http\":*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

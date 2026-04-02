@@ -21,22 +21,24 @@ public class StrategistAgent {
         this.converter = new RobustEntityConverter(mapper);
     }
 
-    public GTMPlan buildGTM(ProductBrief brief) {
+    public GTMPlan buildGTM(ProductBrief brief, String language) {
         var spec = chatClient.prompt()
                 .user(u -> u.text("""
-                        Produit : {name}
-                        Description : {description}
-                        Stack : {stack}
-                        Audience : {audience}
-                        USP : {usp}
+                        Product: {name}
+                        Description: {description}
+                        Stack: {stack}
+                        Audience: {audience}
+                        USP: {usp}
 
-                        Construis le plan GTM.
+                        Build the GTM plan.
+                        IMPORTANT: Write ALL JSON string values in {language}.
                         """)
                         .param("name",        brief.name())
                         .param("description", brief.description())
                         .param("stack",       brief.stack())
                         .param("audience",    brief.audience())
-                        .param("usp",         brief.usp()))
+                        .param("usp",         brief.usp())
+                        .param("language",    language))
                 .call();
 
         return converter.convert(spec, GTMPlan.class);

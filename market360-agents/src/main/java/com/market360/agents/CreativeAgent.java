@@ -22,20 +22,22 @@ public class CreativeAgent {
         this.converter = new RobustEntityConverter(mapper);
     }
 
-    public AdCreative generate(ProductBrief brief, GTMPlan gtm) {
+    public AdCreative generate(ProductBrief brief, GTMPlan gtm, String language) {
         var spec = chatClient.prompt()
                 .user(u -> u.text("""
-                        Produit : {name}
-                        USP : {usp}
-                        Segment cible : {segment}
-                        Positionnement : {positioning}
+                        Product: {name}
+                        USP: {usp}
+                        Target segment: {segment}
+                        Positioning: {positioning}
 
-                        Génère les assets créatifs.
+                        Generate the creative assets.
+                        IMPORTANT: Write ALL JSON string values in {language}. Do NOT prefix ad variants with angle labels.
                         """)
                         .param("name",        brief.name())
                         .param("usp",         brief.usp())
                         .param("segment",     gtm.targetSegment())
-                        .param("positioning", gtm.positioningStatement()))
+                        .param("positioning", gtm.positioningStatement())
+                        .param("language",    language))
                 .call();
 
         return converter.convert(spec, AdCreative.class);

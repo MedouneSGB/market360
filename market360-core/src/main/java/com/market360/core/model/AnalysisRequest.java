@@ -20,9 +20,18 @@ public record AnalysisRequest(
         @Pattern(regexp = "local|global", message = "market must be 'local' or 'global'")
         String market,
 
-        String location     // ex: "Dakar", "Paris" — facultatif si market=global
+        String location,    // ex: "Dakar", "Paris" — facultatif si market=global
+
+        @Pattern(regexp = "fr|en", message = "language must be 'fr' or 'en'")
+        String language     // langue du rapport — défaut "fr"
 ) {
     public AnalysisRequest {
-        market = (market == null || market.isBlank()) ? "global" : market;
+        market   = (market   == null || market.isBlank())   ? "global" : market;
+        language = (language == null || language.isBlank()) ? "fr"     : language;
+    }
+
+    /** Nom complet de la langue pour les instructions LLM. */
+    public String languageName() {
+        return "en".equals(language) ? "English" : "French";
     }
 }
