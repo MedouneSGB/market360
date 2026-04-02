@@ -180,24 +180,51 @@
     </nav>
 
     <!-- Hero -->
-    <div class="text-center mb-16 slide-up">
-      <div class="badge mb-6">
+    <div class="text-center mb-10 slide-up">
+      <div class="badge mb-5">
         <span class="w-1.5 h-1.5 bg-green-500 rounded-full" style="animation:dotPulse 2s infinite"></span>
         Intelligence Marketing par IA
       </div>
 
-      <h1 class="text-6xl font-black mb-5 leading-[1.05] tracking-tight">
+      <h1 class="text-5xl font-black mb-4 leading-[1.08] tracking-tight">
         Votre plan marketing<br/>
         <span class="gradient-text">en quelques minutes</span>
       </h1>
 
-      <p class="text-lg muted max-w-lg mx-auto leading-relaxed">
-        Donnez un repo GitHub. Obtenez une analyse produit complète, un plan GTM, une veille marché et des assets créatifs — prêts à exécuter.
+      <p class="text-base muted max-w-md mx-auto leading-relaxed">
+        Collez un repo GitHub et obtenez un plan marketing complet — prêt à exécuter.
       </p>
     </div>
 
-    <!-- Agent cards -->
-    <div class="grid grid-cols-4 gap-3 mb-12 slide-up" style="animation-delay:0.1s">
+    <!-- Form — CTA principal -->
+    <div class="card rounded-3xl p-6 mb-6 slide-up" style="animation-delay:0.1s">
+      <div class="flex flex-col gap-3">
+        <div class="flex gap-2">
+          <input id="repoUrl" type="url" placeholder="https://github.com/owner/repo"
+            class="input-field flex-1 rounded-xl px-4 py-3.5 text-sm"
+            onkeydown="if(event.key==='Enter')startAnalysis()" />
+          <select id="market" onchange="toggleLocation()"
+            class="input-field rounded-xl px-3 py-3.5 text-sm cursor-pointer appearance-none shrink-0">
+            <option value="global">🌍 Global</option>
+            <option value="local">📍 Local</option>
+          </select>
+        </div>
+        <div id="locationField" class="hidden">
+          <input id="location" type="text" placeholder="Dakar, Paris, New York..."
+            class="input-field w-full rounded-xl px-4 py-3 text-sm" />
+        </div>
+        <button onclick="startAnalysis()" id="analyzeBtn"
+          class="w-full gradient-bg hover:opacity-90 active:scale-[0.99] transition-all rounded-xl px-6 py-3.5 font-semibold text-white flex items-center justify-center gap-2 shadow-lg shadow-violet-500/20">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+          </svg>
+          Analyser ce repo
+        </button>
+      </div>
+    </div>
+
+    <!-- Agent cards — ce que vous obtenez -->
+    <div class="grid grid-cols-4 gap-3 mb-10 slide-up" style="animation-delay:0.2s">
       <div class="agent-card rounded-2xl p-4 text-center">
         <div class="text-2xl mb-2">🔍</div>
         <p class="text-xs font-semibold mb-0.5">Analyst</p>
@@ -217,39 +244,6 @@
         <div class="text-2xl mb-2">🎨</div>
         <p class="text-xs font-semibold mb-0.5">Creative</p>
         <p class="text-xs muted">Copy & ads</p>
-      </div>
-    </div>
-
-    <!-- Form -->
-    <div class="card rounded-3xl p-8 slide-up" style="animation-delay:0.2s">
-      <div class="space-y-4">
-        <div>
-          <label class="block text-sm font-semibold mb-2">URL du repo GitHub</label>
-          <input id="repoUrl" type="url" placeholder="https://github.com/owner/repo"
-            class="input-field w-full rounded-xl px-4 py-3.5 text-sm" />
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-sm font-semibold mb-2">Marché</label>
-            <select id="market" onchange="toggleLocation()"
-              class="input-field w-full rounded-xl px-4 py-3.5 text-sm cursor-pointer appearance-none">
-              <option value="global">🌍 Global</option>
-              <option value="local">📍 Local</option>
-            </select>
-          </div>
-          <div id="locationField" class="hidden">
-            <label class="block text-sm font-semibold mb-2">Ville / Pays</label>
-            <input id="location" type="text" placeholder="Dakar, Paris..."
-              class="input-field w-full rounded-xl px-4 py-3.5 text-sm" />
-          </div>
-        </div>
-        <button onclick="startAnalysis()" id="analyzeBtn"
-          class="w-full gradient-bg hover:opacity-90 active:scale-[0.99] transition-all rounded-xl px-6 py-4 font-semibold text-white flex items-center justify-center gap-2 shadow-lg shadow-violet-500/20">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-          </svg>
-          Analyser ce repo
-        </button>
       </div>
     </div>
 
