@@ -87,12 +87,18 @@ public class GitHubClient {
         var request = baseRequest(API_BASE + path).GET().build();
         try {
             var response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() == 404) {
-                throw new GitHubApiException("Repo introuvable (404) : " + path);
-            }
-            if (response.statusCode() != 200) {
+            int status = response.statusCode();
+            if (status == 404) {
                 throw new GitHubApiException(
-                        "GitHub API erreur %d : %s".formatted(response.statusCode(), path));
+                        "Repo introuvable — vérifiez l'URL (le dépôt n'existe pas ou a été supprimé) : " + path);
+            }
+            if (status == 401 || status == 403) {
+                throw new GitHubApiException(
+                        "Accès refusé — ce dépôt est privé ou nécessite une authentification (HTTP " + status + ") : " + path);
+            }
+            if (status != 200) {
+                throw new GitHubApiException(
+                        "GitHub API erreur %d : %s".formatted(status, path));
             }
             return mapper.readTree(response.body());
         } catch (GitHubApiException e) {

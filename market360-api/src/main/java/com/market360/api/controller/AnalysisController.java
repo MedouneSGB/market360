@@ -113,8 +113,9 @@ public class AnalysisController {
             publishEvent(jobId, new AgentEvent("all", "done", "Rapport prêt"));
             completeDone(emitters.get(jobId), jobId);
         } catch (Exception e) {
-            publishEvent(jobId, new AgentEvent("all", "error",
-                    e.getMessage() != null ? e.getMessage() : "Erreur inconnue"));
+            String msg = e.getMessage() != null ? e.getMessage() : "Erreur inconnue";
+            publishEvent(jobId, new AgentEvent("all", "error", msg));
+            completeError(emitters.get(jobId), jobId);
         }
     }
 
@@ -150,7 +151,20 @@ public class AnalysisController {
         try {
             emitter.send(SseEmitter.event()
                     .data(Map.of("agent", "all", "status", "done", "reportId", jobId)));
-            emitter.complete();
         } catch (IOException ignored) {}
+        finalizeEmitter(emitter, jobId);
+    }
+
+    private void completeError(SseEmitter emitter, String jobId) {
+        finalizeEmitter(emitter, jobId);
+    }
+
+    private void finalizeEmitter(SseEmitter emitter, String jobId) {
+        emitters.remove(jobId);
+        eventBuffers.remove(jobId);
+        if (emitter == null) return;
+        try {
+            emitter.complete();
+        } catch (Exception ignored) {}
     }
 }

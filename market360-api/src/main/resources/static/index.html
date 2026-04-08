@@ -304,6 +304,7 @@
 
       <!-- Loader -->
       <div id="loaderPanel" class="py-6 space-y-6">
+        <div id="analysisError" class="hidden rounded-xl px-4 py-3 text-sm font-medium" style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.3);color:#ef4444"></div>
         <div class="flex flex-col items-center gap-4 py-2">
           <div class="spinner"></div>
           <div class="text-center">
@@ -425,6 +426,8 @@
         labelVisualBrief: 'Brief Visuel',
         agentAnalyst: 'Analyse repo', agentStrategist: 'Plan GTM',
         agentTrends: 'Veille marché', agentCreative: 'Copy & ads',
+        errorNetwork: 'Connexion perdue — vérifiez votre réseau et réessayez.',
+        errorDefault: 'Une erreur est survenue. Vérifiez l\'URL et réessayez.',
         steps: {
           analyst:    { pct:25, step:'Analyst Agent',    comment:'Lecture du README et des issues GitHub...', sub:'Extraction du stack, audience et USP' },
           strategist: { pct:55, step:'Strategist Agent', comment:'Construction du plan Go-To-Market...', sub:'Canaux, milestones et stratégie de prix' },
@@ -469,6 +472,8 @@
         labelVisualBrief: 'Visual Brief',
         agentAnalyst: 'Repo analysis', agentStrategist: 'GTM plan',
         agentTrends: 'Market intel', agentCreative: 'Copy & ads',
+        errorNetwork: 'Connection lost — check your network and try again.',
+        errorDefault: 'An error occurred. Check the URL and try again.',
         steps: {
           analyst:    { pct:25, step:'Analyst Agent',    comment:'Reading README and GitHub issues...', sub:'Extracting stack, audience and USP' },
           strategist: { pct:55, step:'Strategist Agent', comment:'Building Go-To-Market plan...', sub:'Channels, milestones and pricing strategy' },
@@ -570,6 +575,8 @@
       if (sub !== undefined) document.getElementById('loaderSub').textContent = sub;
     }
     function resetLoader() {
+      document.getElementById('analysisError').classList.add('hidden');
+      document.getElementById('analysisError').textContent = '';
       setBar(0, t('loaderStart'), t('loaderInit'), t('loaderInitSub'));
       ['analyst','strategist','trends','creative'].forEach(a => {
         const dot = document.querySelector(`#step-${a} .step-dot`);
@@ -577,6 +584,14 @@
         if (dot) dot.className = 'step-dot shrink-0';
         if (label) { label.style.color = ''; label.style.fontWeight = ''; }
       });
+    }
+
+    function showAnalysisError(msg) {
+      const el = document.getElementById('analysisError');
+      el.textContent = '⚠ ' + (msg || t('errorDefault'));
+      el.classList.remove('hidden');
+      document.getElementById('drawerTitle').textContent = 'Analyse échouée';
+      document.getElementById('drawerSubtitle').textContent = '';
     }
 
     function tag(label, value) {
@@ -673,9 +688,9 @@
           const data = JSON.parse(e.data);
           if (data.agent && data.agent !== 'all') setLoaderProgress(data.agent, data.status);
           if (data.agent === 'all' && data.status === 'done' && data.reportId) { es.close(); fetchReport(data.reportId); }
-          if (data.status === 'error') { es.close(); resetBtn(); }
+          if (data.status === 'error') { es.close(); showAnalysisError(data.message); resetBtn(); }
         };
-        es.onerror = () => { es.close(); resetBtn(); };
+        es.onerror = () => { es.close(); showAnalysisError(t('errorNetwork')); resetBtn(); };
       } catch(err) { console.error(err); resetBtn(); }
     }
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -37,5 +38,29 @@ class GitHubClientTest {
         var client = new GitHubClient(mapper, "");
         assertThrows(GitHubApiException.class,
                 () -> client.fetchRepoContext("https://github.com/"));
+    }
+
+    @Test
+    void messageErreur404ContientInfosClaires() {
+        var client = new GitHubClient(mapper, "");
+        assertThatThrownBy(() -> client.fetchRepoContext("https://github.com/this-user-does-not-exist-xyz/nonexistent-repo-abc"))
+                .isInstanceOf(GitHubApiException.class)
+                .hasMessageContaining("introuvable");
+    }
+
+    @Test
+    void messageErreurUrlVideExplicite() {
+        var client = new GitHubClient(mapper, "");
+        assertThatThrownBy(() -> client.fetchRepoContext(""))
+                .isInstanceOf(GitHubApiException.class)
+                .hasMessageContaining("invalide");
+    }
+
+    @Test
+    void messageErreurUrlNonGitHub() {
+        var client = new GitHubClient(mapper, "");
+        assertThatThrownBy(() -> client.fetchRepoContext("https://gitlab.com/owner/repo"))
+                .isInstanceOf(GitHubApiException.class)
+                .hasMessageContaining("invalide");
     }
 }
